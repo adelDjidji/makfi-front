@@ -1,0 +1,38 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    padding: 10px;
+  }
+  .grid-item {
+    background-color: rgba(4,4,4,.12);
+    padding: 2px 20px;
+    font-size: 30px;
+    text-align: center;
+    margin: 4px 7pt;
+    border-radius: 5pt;
+  }
+  .grid-item:active{
+      background:linear-gradient(45deg,#03a9f4,#0aa5b9);
+  }
+  
+  .center{
+    text-align: center;
+  }
+  .head-title{
+    background: linear-gradient(45deg, #03A9F4, #0aa5b9);
+    color: white;
+    padding: 13px;
+  }
+  span.pin-value {
+    font-size: 25pt;
+    font-weight: bold;
+    border-bottom: solid 3px;
+    margin: 0 12pt;
+    background-color: aliceblue;
+    padding: 5pt 19pt;
+    border-radius: 11pt;
+}
+.pin-values{
+    text-align: center;
+    margin: 11pt;
+}
