@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { Form, Input, Button, Checkbox, Tabs, Icon, Typography } from "antd";
+import {
+  setAuthenticated
+} from "../Redux/MainReducer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserLock } from '@fortawesome/free-solid-svg-icons'
 
@@ -27,11 +32,14 @@ const tailLayout = {
 };
 
 function Login() {
+  const dispatch = useDispatch()
   const onFinish = values => {
     console.log("Success:", values);
   };
   const onSubmit = e => {
     e.preventDefault()
+    dispatch(setAuthenticated())
+    // window.location.href="/home"
     console.log("Success submit");
   };
 
@@ -81,17 +89,29 @@ function Login() {
         <Form.Item {...tailLayout} name="remember" valuePropName="checked">
           <Checkbox>Remember me</Checkbox>
         </Form.Item>
-
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit">
-            Se connecter <Icon type="login" />
-          </Button>
+           <Button type="primary" htmlType="submit">
+             Se connecter <Icon type="login" />
+           </Button>
         </Form.Item>
+        
+        
       </Form>
     );
   };
 
- 
+  // <Link style={{color: 'white',
+  //         background: '#1890ff',
+  //         padding: '8pt 16pt',
+  //         borderRadius: '5pt'}} to="/home"><Icon type="login" /> Se connecter</Link>
+
+
+//   <Form.Item {...tailLayout}>
+//   <Button type="primary" htmlType="submit">
+//     Se connecter <Icon type="login" />
+//   </Button>
+// </Form.Item>
+
   return (
     <div  style={{ padding: "0 9pt", height: "100%" }}>
     <Title className="head-title center" level={2}>MAKFI</Title>

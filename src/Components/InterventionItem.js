@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge, Icon, Tooltip } from "antd";
+import { Badge, Icon, Tooltip, Typography } from "antd";
 import moment from "moment";
 
 const getStatusText =(statusCode)=>{

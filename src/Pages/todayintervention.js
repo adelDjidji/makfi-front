@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import {Breadcrumb, Icon} from "antd";
 
 import {} from "../Redux/MainReducer";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+
 
 export default () => {  
   return (
@@ -10,9 +12,8 @@ export default () => {
     <div className="row">
       <div className="col-3">
       <Breadcrumb>
-            <Breadcrumb.Item href="/">
-              <Icon type="home" />
-              <span>Accueil</span>
+            <Breadcrumb.Item>
+            <Link to="/home"><Icon type="home" /> Accueil</Link>
             </Breadcrumb.Item>
 
             <Breadcrumb.Item>Intervention du jour</Breadcrumb.Item>

@@ -4,6 +4,7 @@ export const slice = createSlice({
   name: "main",
   initialState: {
     value: 0,
+    authenticated: JSON.parse(sessionStorage.getItem("isLogged")),
     auth: {
       isLogged: false,
       lastLoginDate: null,
@@ -106,6 +107,7 @@ export const slice = createSlice({
       // which detects changes to a "draft state" and produces a brand new
       // immutable state based off those changes
       state.value += 1;
+      state.isLogged = true;
     },
     decrement: state => {
       state.value -= 1;
@@ -113,12 +115,24 @@ export const slice = createSlice({
     incrementByAmount: (state, action) => {
       state.value += action.payload;
     },
-
+    setAuthenticated :state=> {
+      state.authenticated = true
+      sessionStorage.setItem("isLogged", "true")
+    },
     setCurrentHotel: (state, action) => {
       state.hotel.currentHotel = action.payload;
     },
     setListeInterventions: (state, action) => {
       state.intervention.listeInterventions = action.payload;
+    },
+    setLogged: state => {
+      console.log("Reducer here ")
+      state.auth.isLogged = true;
+      state.isLogged = true;
+    },
+    setLoggedOut: (state) => {
+      state.authenticated = false
+      sessionStorage.setItem("isLogged", "false")
     }
   }
 });
@@ -128,7 +142,10 @@ export const {
   decrement,
   incrementByAmount,
   setCurrentHotel,
-  setListeInterventions
+  setListeInterventions,
+  setLogged,
+  setLoggedOut,
+  setAuthenticated
 } = slice.actions;
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -144,10 +161,14 @@ export const incrementAsync = amount => dispatch => {
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state) => state.counter.value)`
-export const selectCount = state => state.counter.value;
+export const selectCount = state => state.main.value;
+export const selectAuth = state => state.main.auth;
+export const selectAuthLogged = state => state.main.isLogged;
 export const selectHotels = state => state.main.hotel.listHotels;
 export const selectCurrentHotel = state => state.main.hotel.currentHotel;
 export const selectInterventions = state =>
   state.main.intervention.listeInterventions;
+export const getIsAuth = state=>state.main.authenticated;
+
 
 export default slice.reducer;

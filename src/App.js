@@ -1,15 +1,22 @@
 import React , { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-
 import {
   selectCurrentHotel,
   setCurrentHotel,
   selectHotels,
   selectInterventions,
-  setListeInterventions
+  setListeInterventions,
+  selectAuthLogged,
+  setLoggedOut,
+  setLogged,
+  increment,
+  selectCount,
+  getIsAuth,
+  setAuthenticated,
 } from "./Redux/MainReducer";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import Interventions from "./Pages/interventions";
+import InterventionDetail from "./Pages/interventionDetail";
 import InterventionDuJour from "./Pages/todayintervention";
 import Login from "./Pages/Login";
 import Dashbord from "./Pages/Dashbord";
@@ -55,23 +62,22 @@ const menuMessagerie = (
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href="http://www.alipay.com/"
       >
-        Ajouter
+        marquer comme lu
       </a>
     </Menu.Item>
     <Menu.Item>
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href="http://www.taobao.com/"
+        href="#"
       >
-        Modifer
+        archiver
       </a>
     </Menu.Item>
     <Menu.Item>
-      <a target="_blank" rel="noopener noreferrer" href="http://www.tmall.com/">
-        Supprimer
+      <a target="_blank" rel="noopener noreferrer" href="#">
+        editer
       </a>
     </Menu.Item>
   </Menu>
@@ -80,8 +86,13 @@ const menuMessagerie = (
 export default props => {
   const dispatch = useDispatch();
   const hotels = useSelector(selectHotels);
+  const ISLogged = useSelector(selectAuthLogged)
   const listInterventions = useSelector(selectInterventions);
   const currentHotel = useSelector(selectCurrentHotel);
+  const [logged, setlogged]= useState(ISLogged)
+
+  const count = useSelector(selectCount);
+  const isAuth = useSelector(getIsAuth);
 
   const switchHotel = idHotel => {
     switch (idHotel) {
@@ -105,6 +116,13 @@ export default props => {
       ))}
     </Menu>
   );
+  const menuUser = (
+    <Menu>
+    <Menu.Item onClick={()=>dispatch(setLoggedOut())}>
+    <span>deconnexion</span>
+  </Menu.Item>
+    </Menu>
+  );
 
   const getPageTitle=()=>{
     let currentPath= window.location.pathname
@@ -112,6 +130,7 @@ export default props => {
       case "/employess" :
         return "Gestion des employés";
       case "/" :
+      case "/home":
         return "Accueil"
       case "/interventions" :
         return "Liste des interventions"
@@ -125,11 +144,15 @@ export default props => {
         break;
     }
   }
+  // if(!isAuth) return <button onClick={()=>dispatch(setAuthenticated())}>login babe {count} {JSON.stringify(isAuth)}</button>
+  if(!isAuth) return <Login />
   return (
     <div>
     <Router>
       <div className="row">
         <div className="col-3">
+        <Dropdown overlay={menuUser} placement="bottomCenter">
+
           <Card
             hoverable
             style={{ borderRadius: "5pt", margin: "auto" }}
@@ -142,11 +165,15 @@ export default props => {
           >
             <Meta title="Daniéle Lopez" />
           </Card>
+          </Dropdown>
         </div>
         <div className="col-6">
         <h4 className="title-head">
           <Switch>
           <Route exact path="/">
+            Accueil
+          </Route>
+          <Route exact path="/home">
             Accueil
           </Route>
           <Route exact path="/interventions">
@@ -167,6 +194,7 @@ export default props => {
         </Switch>
 
         </h4>
+        
           <PageHeader
             style={{
               border: "1px solid rgb(246, 242, 208)"
@@ -222,6 +250,7 @@ export default props => {
         <Switch>
           <Route exact path="/" component={Dashbord} />
           <Route exact path="/interventions" component={Interventions} />
+          <Route exact path="/intervention/:id" component={InterventionDetail} />
           <Route
             exact
             path="/todayintervention"
