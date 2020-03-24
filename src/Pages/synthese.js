@@ -10,19 +10,19 @@ export default () => {
   return (
     <div>
     <div className="row">
-      <div className="col-3">
+      <div className="col-2">
       <Breadcrumb>
             <Breadcrumb.Item >
-            <Link to="/home"><Icon type="home" /> Accueil</Link>
+            <Link to="/"><Icon type="home" /> Accueil</Link>
             </Breadcrumb.Item>
 
             <Breadcrumb.Item>Synthese</Breadcrumb.Item>
           </Breadcrumb>
           </div>
-      <div className="col-6">
+      <div className="col-8 noPadding">
           <h1>Synthese</h1>
       </div>
-      <div className="col-3">
+      <div className="col-2">
 
       </div>
     </div>

@@ -176,7 +176,7 @@ function Home() {
         console.log('Cancel');
       },
     });
-    
+
   const editComment = () => {
     setmodalEdit(!modalEdit);
     let { comment } = interventions.filter(
@@ -309,12 +309,14 @@ function Home() {
         </Button>
       </Modal>
 
-      <div className="row" style={{ margin: 0 }}>
-        <div className="col-3">
+      <div className="row" 
+      // style={{ margin: 0 }}
+      >
+        <div className="col-2" style={{paddingLeft: "20pt"}}>
           <div className="links">
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link to="/home">
+                <Link to="/">
                   <Icon type="home" /> Accueil
                 </Link>
               </Breadcrumb.Item>
@@ -342,7 +344,7 @@ function Home() {
             )}
           />
         </div>
-        <div className="col-7">
+        <div className="col-8 noPadding">
           <hr className="transparent" />
           <div className="">
             <PageHeader
@@ -371,9 +373,8 @@ function Home() {
             </div>
           </div>
         </div>
-        <div
-          className="col-3"
-          style={{ width: "40%", display: "flex", flexDirection: "column" }}
+        <div className="col-2"
+          // style={{ width: "40%", display: "flex", flexDirection: "column" }}
         >
           <div>
             <Collapse

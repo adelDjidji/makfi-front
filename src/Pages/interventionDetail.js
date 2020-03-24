@@ -159,11 +159,11 @@ const DropdownMenu = () => {
   return (
     <div>
       <div className="row" style={{margin:0}}>
-        <div className="col-3">
+        <div className="col-2">
           <div className="links">
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link to="/home"><Icon type="home" /> Accueil</Link>
+                <Link to="/"><Icon type="home" /> Accueil</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link to="/interventions">Interventions</Link>
@@ -194,7 +194,7 @@ const DropdownMenu = () => {
           )}
         />
         </div>
-        <div className="col-7">
+        <div className="col-8 noPadding">
         <hr className="transparent" />
         <div className="">
           <PageHeader
@@ -227,7 +227,9 @@ const DropdownMenu = () => {
           </div>
         </div>
         </div>
-        <div className="col-3" style={{ width: "40%", display: "flex", flexDirection: "column" }}>
+        <div className="col-2" 
+        // style={{ width: "40%", display: "flex", flexDirection: "column" }}
+        >
         
         <div>
             <Collapse

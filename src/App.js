@@ -130,7 +130,7 @@ export default props => {
       case "/employess" :
         return "Gestion des employés";
       case "/" :
-      case "/home":
+      case "/":
         return "Accueil"
       case "/interventions" :
         return "Liste des interventions"
@@ -150,12 +150,12 @@ export default props => {
     <div>
     <Router>
       <div className="row">
-        <div className="col-3">
+        <div className="col-2">
         <Dropdown overlay={menuUser} placement="bottomCenter">
 
           <Card
             hoverable
-            style={{ borderRadius: "5pt", margin: "auto" }}
+            style={{ borderRadius: "5pt", margin: "auto", marginLeft: '15pt', marginTop: "4pt" }}
             cover={
               <img
                 alt="example"
@@ -167,13 +167,13 @@ export default props => {
           </Card>
           </Dropdown>
         </div>
-        <div className="col-6">
+        <div className="col-8 noPadding">
         <h4 className="title-head">
           <Switch>
           <Route exact path="/">
             Accueil
           </Route>
-          <Route exact path="/home">
+          <Route exact path="/">
             Accueil
           </Route>
           <Route exact path="/interventions">
@@ -228,11 +228,11 @@ export default props => {
             />
           </div>
         </div>
-        <div className="col-3">
+        <div className="col-2">
           <Dropdown overlay={menuHotels} placement="bottomCenter">
             <Card
               hoverable
-              style={{ borderRadius: "5pt", margin: "auto" }}
+              style={{ borderRadius: "5pt", margin: "auto", marginRight: '10pt', marginTop: "4pt" }}
               cover={<img alt="hotel image" src={currentHotel.image} />}
             >
               <Meta

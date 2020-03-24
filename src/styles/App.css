@@ -112,7 +112,7 @@ cursor: pointer;
   cursor: pointer;
   background: #eee;
 }
-.col-1, .flex-1{
+/* .col-1, .flex-1{
   flex: 1 !important;
 }
 .col-2, .flex-2{
@@ -123,7 +123,7 @@ cursor: pointer;
 }
 .col-4, .flex-4{
   flex: 4;
-}
+} */
 .card .image{
   width: 42pt;
 }
@@ -186,6 +186,19 @@ cursor: pointer;
 .anticon {
   display: inline-flex !important;
 }
-.col-6 {
+/* .col-6 {
   max-width: 57% !important;
+} */
+.col-8 {
+  -ms-flex: 0 0 55.666667%;
+  flex: 0 0 55.666667%;
+  max-width: 55.666667% !important;
+}
+.col-2 {
+  -ms-flex: 0 0 21.666667%;
+  flex: 0 0 21.666667%;
+  max-width: 21.666667% !important;
+}
+.noPadding{
+  padding: 0;
 }

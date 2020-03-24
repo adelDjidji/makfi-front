@@ -39,7 +39,7 @@ function Login() {
   const onSubmit = e => {
     e.preventDefault()
     dispatch(setAuthenticated())
-    // window.location.href="/home"
+    // window.location.href="/"
     console.log("Success submit");
   };
 
@@ -103,7 +103,7 @@ function Login() {
   // <Link style={{color: 'white',
   //         background: '#1890ff',
   //         padding: '8pt 16pt',
-  //         borderRadius: '5pt'}} to="/home"><Icon type="login" /> Se connecter</Link>
+  //         borderRadius: '5pt'}} to="/"><Icon type="login" /> Se connecter</Link>
 
 
 //   <Form.Item {...tailLayout}>
