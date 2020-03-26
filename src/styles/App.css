@@ -17,6 +17,9 @@
 body{
   font-size: 9pt;
 }
+.red{
+  color: red;
+}
 .ant-page-header-heading-title {
   font-size: 17px;
 }
@@ -138,8 +141,8 @@ cursor: pointer;
 }
 .message-item {
   border-bottom: solid 1px #ebedf0;
-    padding: 9pt 6pt;
-    background-color: #eee8aa47;
+  padding: 8pt 7pt;
+  background-color: #eee8aa47;
 }
 .active{
   width: 10px;
@@ -201,4 +204,14 @@ cursor: pointer;
 }
 .noPadding{
   padding: 0;
+}
+.ant-card-body {
+  padding: 11px 0 !important;
+  zoom: 1;
+}
+.ant-page-header{
+  padding: 8px 18px;
+}
+hr {
+  margin-top: 1pt !important;
 }

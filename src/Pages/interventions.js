@@ -122,11 +122,7 @@ function Home() {
     return (
       <Menu>
         <Menu.Item onClick={newIntervention}>Nouveau</Menu.Item>
-        {selectedInterventions.length === 1 && (
-          <Menu.Item onClick={supprimerIntervention}>
-            Supprimer
-          </Menu.Item>
-        )}
+        
         {selectedInterventions.length === 1 && (
           <Menu.Item>
             <Link to={"intervention/" + idIntervention}>Détails</Link>
@@ -134,6 +130,9 @@ function Home() {
         )}
         {selectedInterventions.length >= 1 && (
           <Menu.Item onClick={editComment}>Modifier commentaire</Menu.Item>
+        )}
+        {selectedInterventions.length === 1 && (
+          <Menu.Item className="red" onClick={supprimerIntervention}>Supprimer</Menu.Item>
         )}
         <Menu.Item onClick={selectAllIntervention}>Sélectionner tous</Menu.Item>
       </Menu>
@@ -161,20 +160,22 @@ function Home() {
     );
   };
 
-  const supprimerIntervention = () => 
+  const supprimerIntervention = () =>
     Modal.confirm({
-      title: 'Etes-vous sur de supprimer cet intervention?',
-      okText: 'Supprimer',
-      okType: 'danger',
-      cancelText: 'Annuler',
+      title: "Etes-vous sur de supprimer cet intervention?",
+      okText: "Supprimer",
+      okType: "danger",
+      cancelText: "Annuler",
       onOk() {
-        let listnew = interventions.filter(item=>selectedInterventions.indexOf(item.id)<0)
-        setinterventions(listnew)
-        setselectedInterventions([])
+        let listnew = interventions.filter(
+          item => selectedInterventions.indexOf(item.id) < 0
+        );
+        setinterventions(listnew);
+        setselectedInterventions([]);
       },
       onCancel() {
-        console.log('Cancel');
-      },
+        console.log("Cancel");
+      }
     });
 
   const editComment = () => {
@@ -245,7 +246,6 @@ function Home() {
     setInterventionObject({ ...InterventionObject, status: value });
   }
 
-
   return (
     <div>
       <Modal
@@ -309,21 +309,24 @@ function Home() {
         </Button>
       </Modal>
 
-      <div className="row" 
-      // style={{ margin: 0 }}
-      >
-        <div className="col-2" style={{paddingLeft: "20pt"}}>
-          <div className="links">
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link to="/">
-                  <Icon type="home" /> Accueil
-                </Link>
-              </Breadcrumb.Item>
+      <div className="row" style={{ margin: "0 10px" }}>
+        <div className="links">
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link to="/">
+                <Icon type="home" /> Accueil
+              </Link>
+            </Breadcrumb.Item>
 
-              <Breadcrumb.Item>Planning</Breadcrumb.Item>
-            </Breadcrumb>
-          </div>
+            <Breadcrumb.Item>Planning</Breadcrumb.Item>
+          </Breadcrumb>
+        </div>
+      </div>
+      <div
+        className="row"
+        // style={{ margin: 0 }}
+      >
+        <div className="col-2" style={{ paddingLeft: "20pt" }}>
           <List
             size="small"
             header={
@@ -345,7 +348,6 @@ function Home() {
           />
         </div>
         <div className="col-8 noPadding">
-          <hr className="transparent" />
           <div className="">
             <PageHeader
               style={{
@@ -373,7 +375,8 @@ function Home() {
             </div>
           </div>
         </div>
-        <div className="col-2"
+        <div
+          className="col-2"
           // style={{ width: "40%", display: "flex", flexDirection: "column" }}
         >
           <div>

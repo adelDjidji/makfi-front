@@ -4,6 +4,7 @@ export const slice = createSlice({
   name: "main",
   initialState: {
     value: 0,
+    currentIntervention:"",
     authenticated: JSON.parse(sessionStorage.getItem("isLogged")),
     auth: {
       isLogged: false,
@@ -133,6 +134,9 @@ export const slice = createSlice({
     setLoggedOut: (state) => {
       state.authenticated = false
       sessionStorage.setItem("isLogged", "false")
+    },
+    setCurrentIntervention : (state, action) =>{
+      state.currentIntervention = action.payload
     }
   }
 });
@@ -145,7 +149,8 @@ export const {
   setListeInterventions,
   setLogged,
   setLoggedOut,
-  setAuthenticated
+  setAuthenticated,
+  setCurrentIntervention
 } = slice.actions;
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -169,6 +174,7 @@ export const selectCurrentHotel = state => state.main.hotel.currentHotel;
 export const selectInterventions = state =>
   state.main.intervention.listeInterventions;
 export const getIsAuth = state=>state.main.authenticated;
+export const selectCurrentIntervention = state => state.main.currentIntervention
 
 
 export default slice.reducer;

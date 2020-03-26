@@ -8,11 +8,9 @@ import {
   setListeInterventions,
   selectAuthLogged,
   setLoggedOut,
-  setLogged,
-  increment,
   selectCount,
   getIsAuth,
-  setAuthenticated,
+  selectCurrentIntervention,
 } from "./Redux/MainReducer";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import Interventions from "./Pages/interventions";
@@ -86,6 +84,7 @@ const menuMessagerie = (
 export default props => {
   const dispatch = useDispatch();
   const hotels = useSelector(selectHotels);
+  const currentIntervention = useSelector(selectCurrentIntervention);
   const ISLogged = useSelector(selectAuthLogged)
   const listInterventions = useSelector(selectInterventions);
   const currentHotel = useSelector(selectCurrentHotel);
@@ -173,8 +172,11 @@ export default props => {
           <Route exact path="/">
             Accueil
           </Route>
-          <Route exact path="/">
-            Accueil
+          <Route exact path="/intervention/:id" >
+            Intervention du {currentIntervention}
+          </Route>
+          <Route exact path="/roomGroup/:id" >
+            Group de chambres - Détail
           </Route>
           <Route exact path="/interventions">
               Planning des interventions
@@ -246,7 +248,7 @@ export default props => {
           </Dropdown>
         </div>
       </div>
-      
+      <hr className="transparent" />
         <Switch>
           <Route exact path="/" component={Dashbord} />
           <Route exact path="/interventions" component={Interventions} />
