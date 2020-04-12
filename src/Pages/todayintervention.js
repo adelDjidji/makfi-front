@@ -8,7 +8,7 @@ import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 export default () => {
   return (
     <div>
-      <div className="row" style={{ margin: "0 10px" }}>
+      <div className="row" style={{ margin: "0 22px" }}>
         <Breadcrumb>
           <Breadcrumb.Item>
             <Link to="/">

@@ -1,1 +1,1 @@
-.ant-card-cover{height:9rem;overflow:hidden}.dash-links a{display:block;margin:30px 11pt;font-size:17pt;background:#eee;padding:11pt;border-radius:3pt}
+.ant-card-cover{height:9rem;overflow:hidden}.dash-links a{display:block;margin:30px 11pt;font-size:17pt;border:solid 1px;padding:11pt;border-radius:3pt;text-align:center;transition:all ease .3s}.dash-links a:hover{background:linear-gradient(45deg,#03a9f4,#0985c1);color:#fff;font-weight:700}

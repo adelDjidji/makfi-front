@@ -9,11 +9,13 @@ import "../styles/dashbord.min.css";
 
 export default () => {
 
+  const todayInterventionID= 2;
+  
   return (
     <div>
-      <div className="row container dash-links" style={{ maxWidth: '100%'}}>
+      <div className="row container dash-links" style={{ marginLeft: '7pt'}}>
         <div className="" style={{width:"50%"}}>
-          <Link to="/todayintervention"><FontAwesomeIcon icon={icons.faConciergeBell} /> Intervention du jour</Link>
+          <Link to={"/intervention/"+todayInterventionID}><FontAwesomeIcon icon={icons.faConciergeBell} /> Intervention du jour</Link>
           <Link to="/interventions"><FontAwesomeIcon icon={icons.faCalendarAlt} /> Planning des interventions</Link>
           <Link to="/synthese"><FontAwesomeIcon icon={icons.faTable} />  Synthèse mensuelle</Link>
         </div>

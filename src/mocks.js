@@ -1,16 +1,19 @@
 export const listeEtat = [
     {
       status: "success",
+      state:"OK",
       text: "OK",
       active: true
     },
     {
       status: "error",
+      state:"Incident",
       text: "Incident",
       active: false
     },
     {
       status: "default",
+      state: "NonFait",
       text: "Non fait",
       active: false
     }
@@ -46,3 +49,4 @@ export const listeEtat = [
       status: "eror"
     }
   ];
+  export const API_URL = "https://makfi.azurewebsites.net/api/"

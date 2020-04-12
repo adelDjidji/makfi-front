@@ -6,7 +6,14 @@
     display: block;
       margin: 30px 11pt;
       font-size: 17pt;
-      background: #eee;
+      border: solid 1px;
       padding: 11pt;
       border-radius: 3pt;
+      text-align: center;
+      transition: all ease .3s;
+  }
+  .dash-links a:hover{
+    background: linear-gradient(45deg, #03A9F4, #0985c1);
+    color: white;
+    font-weight: bold;
   }

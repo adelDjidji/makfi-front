@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
-
-import {
-  selectInterventions,
-  setListeInterventions
-} from "../Redux/MainReducer";
+import * as Selectors from "../Redux/MainReducer";
 
 import InterventionItem from "../Components/InterventionItem";
 import {
@@ -30,7 +26,11 @@ import {
 
 import moment from "../moment";
 import { listeEtat } from "../mocks";
+import Api from "../Api/api";
 
+const listeEtatOptions = listeEtat.map(i => {
+  return { label: i.text, value: i.status };
+});
 const { Option } = Select;
 const { Panel } = Collapse;
 const { Meta } = Card;
@@ -45,23 +45,39 @@ const MonthsOptions = [
   { value: 2, label: "Février" }
 ];
 
+const initialInterventionObject= {
+  StartDateTime: null,
+  State: null,
+  Commentaire: null,
+  etage: null
+}
 function Home() {
   const dispatch = useDispatch();
-  const listInterventions = useSelector(selectInterventions);
+  const listInterventions = useSelector(Selectors.selectInterventions);
 
   const [interventions, setinterventions] = useState(listInterventions);
   const [checkedYears, setcheckedYears] = useState([2019, 2020]);
   const [checkedMonth, setcheckedMonth] = useState([1]);
+  const [checkedStatus, setcheckedStatus] = useState(listeEtatOptions);
   const [selectedInterventions, setselectedInterventions] = useState([]);
   const [modalEdit, setmodalEdit] = useState(false);
   const [modalNew, setmodalNew] = useState(false);
   const [commentText, setcommentText] = useState("");
-  const [InterventionObject, setInterventionObject] = useState({
-    dateTime: null,
-    status: null,
-    comment: null,
-    etage: null
-  });
+  const currentHotel = useSelector(Selectors.selectCurrentHotel);
+
+  const [InterventionObject, setInterventionObject] = useState(initialInterventionObject);
+
+  useEffect(() => {
+    console.log("changedd interventions liste",listInterventions);
+    setinterventions(listInterventions);
+  }, [listInterventions]);
+
+  currentHotel && listInterventions.length == 0 && 
+    Api.get("Interventions/GetInterventions?hotelId=" + currentHotel.ID).then(
+      res => {
+        dispatch(Selectors.setListeInterventions(res.data));
+      }
+    );
 
   const onChangeYear = checkedValues => {
     let tmp = listInterventions.filter(item => {
@@ -72,6 +88,7 @@ function Home() {
     console.log("tmp = ", tmp);
     console.log("checked = ", checkedValues);
   };
+
   const onChangeMonth = checkedValues => {
     let tmp = listInterventions.filter(item => {
       return checkedValues.find(e => moment(item.dateTime).month() === e);
@@ -79,6 +96,17 @@ function Home() {
     setinterventions(tmp);
     console.log("tmp = ", tmp);
     setcheckedMonth(checkedValues);
+  };
+
+  const onChangeStatusFilter = checkedValues => {
+    console.log("checkedValues=", checkedValues);
+    console.log("listInterventions=", listInterventions);
+    let tmp = listInterventions.filter(item => {
+      return checkedValues.find(e => item.status === e);
+    });
+    setinterventions(tmp);
+    console.log("tmp = ", tmp);
+    setcheckedStatus(checkedValues);
   };
 
   //selectionner une intervention
@@ -91,6 +119,7 @@ function Home() {
       setselectedInterventions([...selectedInterventions, id]);
     }
   };
+
   const selectAllIntervention = () => {
     let Ids = interventions.map(item => item.id);
     console.log("IDS=", Ids);
@@ -99,11 +128,20 @@ function Home() {
     else setselectedInterventions(Ids);
   };
 
-  const updateInterventionState = newStatus => {
+  const  updateInterventionState = async  newStatus => {
     if (selectedInterventions.length !== 0) {
+      await selectedInterventions.map(item=>{
+        Api.put("Interventions/PutIntervention/"+ item +"?state="+ newStatus)
+        .then(res=>{
+          console.log("res update =",res)
+          if(res.status==204){//update item success
+          }
+        })
+      })
+      
       let tmp = interventions.map(item => {
-        if (selectedInterventions.indexOf(item.id) >= 0)
-          return { ...item, status: newStatus };
+        if (selectedInterventions.indexOf(item.ID) >= 0)
+          return { ...item, State: newStatus };
         else return item;
       });
       setinterventions(tmp);
@@ -122,7 +160,7 @@ function Home() {
     return (
       <Menu>
         <Menu.Item onClick={newIntervention}>Nouveau</Menu.Item>
-        
+
         {selectedInterventions.length === 1 && (
           <Menu.Item>
             <Link to={"intervention/" + idIntervention}>Détails</Link>
@@ -132,7 +170,9 @@ function Home() {
           <Menu.Item onClick={editComment}>Modifier commentaire</Menu.Item>
         )}
         {selectedInterventions.length === 1 && (
-          <Menu.Item className="red" onClick={supprimerIntervention}>Supprimer</Menu.Item>
+          <Menu.Item className="red" onClick={supprimerIntervention}>
+            Supprimer
+          </Menu.Item>
         )}
         <Menu.Item onClick={selectAllIntervention}>Sélectionner tous</Menu.Item>
       </Menu>
@@ -160,15 +200,23 @@ function Home() {
     );
   };
 
-  const supprimerIntervention = () =>
+  const supprimerIntervention =  () =>
     Modal.confirm({
       title: "Etes-vous sur de supprimer cet intervention?",
       okText: "Supprimer",
       okType: "danger",
       cancelText: "Annuler",
-      onOk() {
+      onOk(){
+         selectedInterventions.map(item=>{
+          Api.delete("Interventions/DeleteIntervention/"+ item)
+          .then(res=>{
+            console.log("res delete =",res)
+            
+          })
+        })
+
         let listnew = interventions.filter(
-          item => selectedInterventions.indexOf(item.id) < 0
+          item => selectedInterventions.indexOf(item.ID) < 0
         );
         setinterventions(listnew);
         setselectedInterventions([]);
@@ -180,18 +228,18 @@ function Home() {
 
   const editComment = () => {
     setmodalEdit(!modalEdit);
-    let { comment } = interventions.filter(
-      e => e.id == selectedInterventions[0]
+    let { Commentaire } = interventions.filter(
+      e => e.ID == selectedInterventions[0]
     )[0];
     console.log("id=", selectedInterventions[0]);
-    console.log("comment=", comment);
-    setcommentText(comment);
+    console.log("comment=", Commentaire);
+    setcommentText(Commentaire);
   };
 
   const saveComment = () => {
     let tmp = interventions.map(item => {
-      if (selectedInterventions.indexOf(item.id) >= 0)
-        return { ...item, comment: commentText };
+      if (selectedInterventions.indexOf(item.ID) >= 0)
+        return { ...item, Commentaire: commentText };
       else return item;
     });
     setinterventions(tmp);
@@ -211,20 +259,21 @@ function Home() {
 
   const addIntervention = () => {
     var newID = interventions.length + 2;
-    setinterventions([...interventions, { ...InterventionObject, id: newID }]);
-    console.log("to add", { ...InterventionObject, id: newID });
+    const newIntervention = {...InterventionObject, HotelID: currentHotel.ID }
+    Api.post("Interventions/PostIntervention",newIntervention)
+    .then(res=>{
+      console.log("res add =",res)
+    })
+    
+    setinterventions([...interventions, newIntervention]);
+    console.log("to add", { ...InterventionObject, ID: newID });
     message.success("intervention ajoutée avec succès");
     hideModalNew();
   };
 
   const hideModalNew = () => {
     setmodalNew(false);
-    setInterventionObject({
-      dateTime: null,
-      status: "",
-      comment: "",
-      etage: null
-    });
+    setInterventionObject(initialInterventionObject);
     setcommentText("");
   };
 
@@ -232,18 +281,18 @@ function Home() {
   const handleChange = e => {
     var val = e.target.value;
     setcommentText(val);
-    setInterventionObject({ ...InterventionObject, comment: val });
+    setInterventionObject({ ...InterventionObject, Commentaire: val });
   };
 
   const onChangeDatetime = (value, dateString) => {
     console.log("Selected Time: ", value);
     console.log("Formatted Selected Time: ", dateString);
-    setInterventionObject({ ...InterventionObject, dateTime: dateString });
+    setInterventionObject({ ...InterventionObject, StartDateTime: dateString });
   };
 
   function handleChangeStatus(value) {
     console.log(`selected ${value}`);
-    setInterventionObject({ ...InterventionObject, status: value });
+    setInterventionObject({ ...InterventionObject, State: value });
   }
 
   return (
@@ -272,6 +321,7 @@ function Home() {
           <small>Date de l'intervention</small>
           <br />
           <DatePicker
+            style={{ width: 230 }}
             showTime={{ format: "HH:mm" }}
             placeholder="Select Time"
             format="YYYY-MM-DD HH:mm"
@@ -283,10 +333,14 @@ function Home() {
         <div>
           <small>Etat</small>
           <br />
-          <Select onChange={handleChangeStatus} style={{ width: 230 }}>
+          <Select
+            placeholder="selectionner un état"
+            onChange={handleChangeStatus}
+            style={{ width: 230 }}
+          >
             <Option value="Incident">Incident</Option>
-            <Option value="Ok">Ok</Option>
-            <Option value="Non fait">Non fait</Option>
+            <Option value="OK">Ok</Option>
+            <Option value="NonFait">Non fait</Option>
           </Select>
         </div>
 
@@ -294,6 +348,7 @@ function Home() {
           <small>Commentaire</small>
           <br />
           <Input
+            style={{ width: 230 }}
             onChange={handleChange}
             value={commentText}
             placeholder="commentaire"
@@ -309,7 +364,7 @@ function Home() {
         </Button>
       </Modal>
 
-      <div className="row" style={{ margin: "0 10px" }}>
+      <div className="row" style={{ margin: "0 22px" }}>
         <div className="links">
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -322,24 +377,20 @@ function Home() {
           </Breadcrumb>
         </div>
       </div>
-      <div
-        className="row"
-        // style={{ margin: 0 }}
-      >
-        <div className="col-2" style={{ paddingLeft: "20pt" }}>
+      <div className="row main-container" style={{}}>
+        <div className="col-2 noPadding right-panel" style={{}}>
           <List
             size="small"
             header={
               <div>
-                <Icon type="swap" /> Etat
+                <Icon type="swap" style={{ marginRight: 10 }} /> Etat
               </div>
             }
-            bordered
             dataSource={listeEtat}
             renderItem={item => (
               <List.Item
                 className="state-item"
-                onClick={updateInterventionState.bind(this, item.status)}
+                onClick={updateInterventionState.bind(this, item.state)}
               >
                 <Badge status={item.status} />
                 {item.text}
@@ -365,8 +416,8 @@ function Home() {
               {interventions.map(item => (
                 <InterventionItem
                   intervention={item}
-                  selected={selectedInterventions.indexOf(item.id) >= 0}
-                  onClick={selectIntervention.bind(this, item.id)}
+                  selected={selectedInterventions.indexOf(item.ID) >= 0}
+                  onClick={selectIntervention.bind(this, item.ID)}
                 />
               ))}
               {interventions.length == 0 && (
@@ -376,14 +427,14 @@ function Home() {
           </div>
         </div>
         <div
-          className="col-2"
+          className="col-2 noPadding filtre-zone"
           // style={{ width: "40%", display: "flex", flexDirection: "column" }}
         >
           <div>
             <Collapse
               bordered={false}
               defaultActiveKey={["1"]}
-              style={{ alignSelf: "flex-end", flex: 1 }}
+              // style={{ alignSelf: "flex-end", flex: 1 }}
             >
               <span className="filtre-title">
                 <Icon type="funnel-plot" /> Filtres
@@ -409,8 +460,19 @@ function Home() {
                   onChange={onChangeMonth}
                 />
               </Panel>
-              <Panel header="Semaine de 19" key="3">
-                <Checkbox>Semaine de 19</Checkbox>
+              <Panel
+                header={
+                  checkedStatus.length == 3
+                    ? "Tous les états"
+                    : `${checkedStatus}`
+                }
+                key="3"
+              >
+                <Checkbox.Group
+                  options={listeEtatOptions}
+                  defaultValue={listeEtatOptions.map(i => i.value)}
+                  onChange={onChangeStatusFilter}
+                />
               </Panel>
             </Collapse>
           </div>

@@ -10,6 +10,7 @@
     text-align: center;
     margin: 4px 7pt;
     border-radius: 5pt;
+    cursor: pointer;
   }
   .grid-item:active{
       background:linear-gradient(45deg,#03a9f4,#0aa5b9);
@@ -28,9 +29,10 @@
     font-weight: bold;
     border-bottom: solid 3px;
     margin: 0 12pt;
-    background-color: aliceblue;
+    background-color: #080808b8;
     padding: 5pt 19pt;
     border-radius: 11pt;
+    color: white;
 }
 .pin-values{
     text-align: center;

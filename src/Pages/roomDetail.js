@@ -16,9 +16,13 @@ export default ({ match }) => {
   const dispatch = useDispatch();
 
   const data = {
-    nom: "Etage A2",
-    comment: "k",
-    employee: ["Angel.B", "Daniel.P"]
+      id: 3,
+      NumeroChambre: 22,
+      RoomGroup:"Etage C",
+      Comment: "comment 101",
+      Status: "success",
+      State:"a faire",
+      Employee:"Daniel.B"
   };
   console.log("id = ", match.params.id);
 
@@ -32,11 +36,11 @@ export default ({ match }) => {
             </Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>
-            <Link to="/interventions">
-              liste des interventions
+            <Link to="/rooms">
+              Gestion des chambres
             </Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Detail de group de chambre</Breadcrumb.Item>
+          <Breadcrumb.Item>Detail de chambre</Breadcrumb.Item>
         </Breadcrumb>
       </div>
       <Row style={{ margin: "0 19px" }}>
@@ -52,9 +56,30 @@ export default ({ match }) => {
             </p>
           </Col>
           <Col span={16}>
-            <p>{data.nom}</p>
+            <p>Chambre {data.NumeroChambre}</p>
           </Col>
         </div>
+        <div className="info-row">
+          <Col span={8}>
+            <p>
+              <b>Groupe</b>
+            </p>
+          </Col>
+          <Col span={16}>
+            <p>{data.RoomGroup}</p>
+          </Col>
+        </div>
+        <div className="info-row">
+          <Col span={8}>
+            <p>
+              <b>Etat actuel</b>
+            </p>
+          </Col>
+          <Col span={16}>
+            <p>{data.State}</p>
+          </Col>
+        </div>
+        
         <div className="info-row">
           <Col span={8}>
             <p>
@@ -62,17 +87,17 @@ export default ({ match }) => {
             </p>
           </Col>
           <Col span={16}>
-            <p>{data.comment}</p>
+            <p>{data.Comment}</p>
           </Col>
         </div>
         <div className="info-row">
           <Col span={8}>
             <p>
-              <b>Employé</b>
+              <b>Employés</b>
             </p>
           </Col>
           <Col span={16}>
-            <p>{data.employee}</p>
+            <p>{data.Employee}</p>
           </Col>
         </div>
       </Row>

@@ -6,77 +6,24 @@ export const slice = createSlice({
     value: 0,
     currentIntervention:"",
     authenticated: JSON.parse(sessionStorage.getItem("isLogged")),
-    auth: {
-      isLogged: false,
-      lastLoginDate: null,
-      currentUser: null
+    currentUser:JSON.parse(sessionStorage.getItem("currentUser")),
+    auth:{
+      current:null
     },
     intervention: {
       listeInterventions: [
-        {
-          id: 1,
-          dateTime: "2019-12-11 10:12:00",
-          comment: "comment 19 -1",
-          active: false,
-          status: "error"
-        },
-        {
-          id: 2,
-          dateTime: "2019-12-12 12:00:00",
-          comment: "comment 19-2",
-          active: false,
-          status: "success"
-        },
-        {
-          id: 3,
-          dateTime: "2020-01-2 12:30:00",
-          comment: "comment 2020 -1",
-          active: true,
-          status: "default"
-        },
-        {
-          id: 4,
-          dateTime: "2020-01-4 12:30:00",
-          comment: "comment 2020 -2",
-          active: false,
-          status: "default"
-        },
-        {
-          id: 5,
-          dateTime: "2020-01-8 12:30:00",
-          comment: "comment 2020 -3",
-          active: false,
-          status: "error"
-        },
-        {
-          id: 6,
-          dateTime: "2020-01-12 11:30:00",
-          comment: "comment 2020 -4",
-          active: false,
-          status: "error"
-        },
-        {
-          id: 7,
-          dateTime: "2020-01-22 11:30:00",
-          comment: "comment 2020 -5",
-          active: false,
-          status: "error"
-        },
-        {
-          id: 8,
-          dateTime: "2020-02-02 11:30:00",
-          comment: "comment 2020 -6",
-          active: true,
-          status: "success"
-        },
-        {
-          id: 9,
-          dateTime: "2020-02-19 11:30:00",
-          comment: "comment 2020 -7",
-          active: true,
-          status: "error"
-        }
       ]
+    },
+    chambre:{
+      listeInterventions:[
+        {
+        id: 1,
+        NumeroChambre: 120,
+        RoomGroup:"Etage A1",
+        Comment: "comment 19 -1",
+        Status: "error",
+        Employee:"Sofia.D"
+      }]
     },
     hotel: {
       currentHotel: {
@@ -85,20 +32,7 @@ export const slice = createSlice({
         image:
           "https://pix10.agoda.net/hotelImages/5043346/-1/c489e0e38444ad6e31453efb5d732e7f.jpg?s=1024x768"
       },
-      listHotels: [
-        {
-          id: 1,
-          name: "La part-Dieu",
-          image:
-            "https://pix10.agoda.net/hotelImages/5043346/-1/c489e0e38444ad6e31453efb5d732e7f.jpg?s=1024x768"
-        },
-        {
-          id: 2,
-          name: "Hotel Salam",
-          image:
-            "https://d1rioy1v9s51jr.cloudfront.net/pics/1757/450x270/hotel-icon-7-icon-and-club-36-king-room---city-view_5938.jpg"
-        }
-      ]
+      listHotels: []
     }
   },
   reducers: {
@@ -137,6 +71,10 @@ export const slice = createSlice({
     },
     setCurrentIntervention : (state, action) =>{
       state.currentIntervention = action.payload
+    },
+    setCurrentUser : (state, action) =>{
+      state.currentUser = action.payload
+      sessionStorage.setItem("currentUser", JSON.stringify(action.payload) )    
     }
   }
 });
@@ -150,7 +88,8 @@ export const {
   setLogged,
   setLoggedOut,
   setAuthenticated,
-  setCurrentIntervention
+  setCurrentIntervention,
+  setCurrentUser
 } = slice.actions;
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -173,8 +112,11 @@ export const selectHotels = state => state.main.hotel.listHotels;
 export const selectCurrentHotel = state => state.main.hotel.currentHotel;
 export const selectInterventions = state =>
   state.main.intervention.listeInterventions;
+export const selectChambreInterventions = state =>
+  state.main.chambre.listeInterventions;
 export const getIsAuth = state=>state.main.authenticated;
 export const selectCurrentIntervention = state => state.main.currentIntervention
+export const selectCurrentUser = state => state.main.currentUser
 
 
 export default slice.reducer;

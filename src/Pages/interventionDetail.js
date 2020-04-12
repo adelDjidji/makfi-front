@@ -70,42 +70,97 @@ const listEtages = [
     title: "Etage C"
   }
 ];
+
+const listeEmployee = [
+  {
+    id: 1,
+    username: "Daniel.B",
+    nom: "Daniel",
+    prenom: "Bernard"
+  },
+  {
+    id: 2,
+    username: "Angela.B",
+    nom: "Angela",
+    prenom: "Bernard"
+  },
+  {
+    id: 3,
+    username: "Sofia.D",
+    nom: "Sofia",
+    prenom: "Doulé"
+  }
+];
+
+const listEntretiens = [
+  {
+    ID: 1,
+    RoomGroup: "Etage A1",
+    Comment: "commentaire 1",
+    InterventionID: 23,
+    Employee: "Sofia.D",
+    State: false
+  },
+  {
+    ID: 2,
+    RoomGroup: "Etage A2",
+    Comment: "commentaire",
+    InterventionID: 23,
+    Employee: "Daniel.B",
+    State: true
+  },
+  {
+    ID: 3,
+    RoomGroup: "Etage C",
+    Comment: "",
+    InterventionID: 23,
+    Employee: "",
+    State: true
+  }
+];
+
+const listeEtagesOptions = listEtages.map(i => {
+  return { label: i.title, value: i.title };
+});
+
+const listeEtatsOptions = [
+  { label: "valide", value: true },
+  { label: "non-valide", value: false }
+];
+
+const listeEmployeeOptions = listeEmployee.map(i => {
+  if (i.username !== "")
+    return {
+      label: i.username,
+      value: i.username
+    };
+  else
+    return {
+      label: "NUL",
+      value: ""
+    };
+});
+
 export default ({ match }) => {
   const dispatch = useDispatch();
 
-  const [checkedYears, setcheckedYears] = useState([2019, 2020]);
-  const [checkedMonth, setcheckedMonth] = useState([1]);
+  const [checkedEtages, setcheckedEtages] = useState(listeEtagesOptions);
+  const [checkedEtats, setcheckedEtats] = useState(listeEtatsOptions);
+  const [checkedEtatsString, setcheckedEtatsString] = useState("");
+  const [checkedEmployee, setcheckedEmployee] = useState(listeEmployeeOptions);
+  
   const [selectedEntretiens, setselectedEntretiens] = useState([]);
   const [modalEdit, setmodalEdit] = useState(false);
   const [modalNew, setmodalNew] = useState(false);
   const [commentText, setcommentText] = useState("");
   const [EntretienObject, setEntretienObject] = useState(InitialEntetienObject);
+  
   console.log("id = ", match.params.id);
 
   dispatch(setCurrentIntervention(`of ID ${match.params.id}`));
 
-  const onChangeYear = checkedValues => {
-    let tmp = listEntretiens.filter(item => {
-      return checkedValues.find(e => moment(item.dateTime).year() === e);
-    });
-    setEntretiens(tmp);
-    setcheckedYears(checkedValues);
-    console.log("tmp = ", tmp);
-    console.log("checked = ", checkedValues);
-  };
-
-  const onChangeMonth = checkedValues => {
-    let tmp = listEntretiens.filter(item => {
-      return checkedValues.find(e => moment(item.dateTime).month() === e);
-    });
-    setEntretiens(tmp);
-    console.log("tmp = ", tmp);
-    setcheckedMonth(checkedValues);
-  };
-
   //selectionner une intervention
   const selectEntretien = id => {
-    console.log("res= ", selectedEntretiens.indexOf(id));
     if (selectedEntretiens.indexOf(id) >= 0) {
       let tmp = selectedEntretiens.filter(item => item !== id);
       setselectedEntretiens(tmp);
@@ -116,61 +171,75 @@ export default ({ match }) => {
 
   const selectAllEntretien = () => {
     let Ids = Entretiens.map(item => item.ID);
-    console.log("IDS=", Ids);
     if (Ids.length == selectedEntretiens.length) setselectedEntretiens([]);
     else setselectedEntretiens(Ids);
   };
 
-  const listeEmployee = [
-    {
-      id: 1,
-      username: "Daniel.B",
-      nom: "Daniel",
-      prenom: "Bernard"
-    },
-    {
-      id: 2,
-      username: "Angela.B",
-      nom: "Angela",
-      prenom: "Bernard"
-    },
-    {
-      id: 3,
-      username: "Sofia.D",
-      nom: "Sofia",
-      prenom: "Doulé"
-    }
-  ];
-
-  const listEntretiens = [
-    {
-      ID: 1,
-      RoomGroup: "Etage 1A",
-      Comment: "waalo",
-      InterventionID: 23,
-      Employee: "Coline",
-      State: false
-    },
-    {
-      ID: 2,
-      RoomGroup: "Etage 5A",
-      Comment: "bien",
-      InterventionID: 23,
-      Employee: "Seward",
-      State: true
-    },
-    {
-      ID: 3,
-      roomGroup: "Etage 1C",
-      comment: "",
-      interventionID: 23,
-      employee: "",
-      State: true
-    }
-  ];
-
   const [Entretiens, setEntretiens] = useState(listEntretiens);
 
+  /**
+   * filtre entretiens by Etage
+   * @param {liste of checked etages} checkedValues
+   */
+  const onChangeEtageFilter = checkedValues => {
+    console.log("checkedValues",checkedValues)
+    let tmp = listEntretiens.filter(item => {
+      return checkedValues.indexOf(item.RoomGroup)>=0
+    });
+    setEntretiens(tmp);
+    console.log("tmp = ", tmp);
+    setcheckedEtages(checkedValues);
+  };
+
+  /**
+   * filtre entretiens by Etat
+   * @param {liste of checked etages} checkedValues
+   */
+  const onChangeEtatFilter = checkedValues => {
+    let tmp= listEntretiens.filter(item=>{
+      return checkedValues.indexOf(item.State)>=0
+    })
+
+    setEntretiens(tmp);
+    console.log("tmp = ", tmp);
+    setcheckedEtats(checkedValues);
+    setcheckedEtatsString(mapListeEtat(checkedValues));
+
+  };
+
+  const mapListeEtat=(list)=>{
+    console.log("liste", list)
+    /**
+     * true = valide
+     * false = non-valide
+     */
+    let tmp = list.map(i=>{
+      if(i) return "valide" 
+      else return "non-valide"
+    })
+    return tmp.join(" ,");
+  }
+
+  /**
+   * filtre entretiens by employee
+   * @param {liste of checked etages} checkedValues
+   */
+  const onChangeEmployeeFilter = checkedValues => {
+    console.log("checkedValues", checkedValues);
+    let tmp = listEntretiens.filter(item => {
+      return checkedValues.find(
+        e => item.Employee === e || item.Employee === ""
+      );
+    });
+    setEntretiens(tmp);
+    console.log("tmp = ", tmp);
+    setcheckedEmployee(checkedValues);
+  };
+
+  /**
+   * update the employee affected to entretien
+   * @param {object of employe} employee
+   */
   const updateEntretienEmployee = employee => {
     if (selectedEntretiens.length > 0) {
       let tmp = Entretiens.map(item => {
@@ -211,7 +280,9 @@ export default ({ match }) => {
           <Menu.Item onClick={editComment}>Modifier commentaire</Menu.Item>
         )}
         {selectedEntretiens.length === 1 && (
-          <Menu.Item className="red" onClick={supprimerEntretien}>Supprimer</Menu.Item>
+          <Menu.Item className="red" onClick={supprimerEntretien}>
+            Supprimer
+          </Menu.Item>
         )}
         <Menu.Item onClick={selectAllEntretien}>Sélectionner tous</Menu.Item>
       </Menu>
@@ -256,7 +327,6 @@ export default ({ match }) => {
         console.log("Cancel");
       }
     });
-
 
   const changeENtretienState = e => {
     var newState = e.target.checked;
@@ -317,6 +387,7 @@ export default ({ match }) => {
   const handleChangeEtage = val => {
     setEntretienObject({ ...EntretienObject, RoomGroup: val });
   };
+
   return (
     <div>
       <Modal
@@ -376,7 +447,7 @@ export default ({ match }) => {
         </Button>
       </Modal>
 
-      <div className="row" style={{ margin: "0 10px" }}>
+      <div className="row" style={{ margin: "0 22px" }}>
         <div className="links">
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -385,22 +456,21 @@ export default ({ match }) => {
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link to="/Entretiens">Entretiens</Link>
+              <Link to="/interventions">liste des interventions</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Detail</Breadcrumb.Item>
           </Breadcrumb>
         </div>
       </div>
-      <div className="row" style={{ margin: 0 }}>
-        <div className="col-2">
+      <div className="row main-container" style={{  }}>
+        <div className="col-2 noPadding right-panel">
           <List
             size="small"
             header={
               <div>
-                <Icon type="users" /> Employés
+                <Icon style={{ marginRight: 10}} type="user" /><b>Employés</b> 
               </div>
             }
-            bordered
             dataSource={listeEmployee}
             renderItem={item => (
               <List.Item
@@ -444,41 +514,60 @@ export default ({ match }) => {
           </div>
         </div>
         <div
-          className="col-2"
+          className="col-2 noPadding filtre-zone"
           // style={{ width: "40%", display: "flex", flexDirection: "column" }}
         >
           <div>
             <Collapse
               bordered={false}
               defaultActiveKey={["1"]}
-              style={{ alignSelf: "flex-end", flex: 1 }}
+              // style={{ alignSelf: "flex-end", flex: 1 }}
             >
               <span className="filtre-title">
                 <Icon type="funnel-plot" /> Filtres
               </span>
-              <Panel header={`Année : ${checkedYears}`} key="1">
+
+              <Panel
+                header={
+                  checkedEmployee.length == listeEmployee.length
+                    ? "Tous les employés"
+                    : `${checkedEmployee}`
+                }
+                key="1"
+              >
                 <Checkbox.Group
-                  options={YearsOptions}
-                  defaultValue={[2019, 2020]}
-                  onChange={onChangeYear}
+                  options={listeEmployeeOptions}
+                  defaultValue={listeEmployeeOptions.map(i => i.value)}
+                  onChange={onChangeEmployeeFilter}
                 />
               </Panel>
               <Panel
-                header={`${checkedMonth.map(i =>
-                  moment()
-                    .month(i - 1)
-                    .format("MMM")
-                )}`}
+                header={
+                  checkedEtages.length == listEtages.length
+                    ? "Tous les étages"
+                    : `${checkedEtages}`
+                }
                 key="2"
               >
                 <Checkbox.Group
-                  options={MonthsOptions}
-                  defaultValue={[1]}
-                  onChange={onChangeMonth}
+                  options={listeEtagesOptions}
+                  defaultValue={listeEtagesOptions.map(i => i.value)}
+                  onChange={onChangeEtageFilter}
                 />
               </Panel>
-              <Panel header="Semaine de 19" key="3">
-                <Checkbox>Semaine de 19</Checkbox>
+              <Panel
+                header={
+                  checkedEtats.length == 2
+                    ? "Tous les états"
+                    : `${checkedEtatsString}`
+                }
+                key="3"
+              >
+                <Checkbox.Group
+                  options={listeEtatsOptions}
+                  defaultValue={listeEtatsOptions.map(i => i.value)}
+                  onChange={onChangeEtatFilter}
+                />
               </Panel>
             </Collapse>
           </div>
