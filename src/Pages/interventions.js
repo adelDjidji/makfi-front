@@ -21,29 +21,25 @@ import {
   Modal,
   Input,
   DatePicker,
-  Select
+  Select,
+  Spin
 } from "antd";
 
 import moment from "../moment";
 import { listeEtat } from "../mocks";
 import Api from "../Api/api";
+import {MonthsOptions, YearsOptions} from "../mocks"
+
 
 const listeEtatOptions = listeEtat.map(i => {
-  return { label: i.text, value: i.status };
+  return { label: i.text, value: i.state };
 });
+
 const { Option } = Select;
 const { Panel } = Collapse;
 const { Meta } = Card;
 
-const YearsOptions = [
-  { value: 2020, label: "2020" },
-  { value: 2019, label: "2019" }
-];
 
-const MonthsOptions = [
-  { value: 1, label: "Janvier" },
-  { value: 2, label: "Février" }
-];
 
 const initialInterventionObject= {
   StartDateTime: null,
@@ -72,16 +68,23 @@ function Home() {
     setinterventions(listInterventions);
   }, [listInterventions]);
 
-  currentHotel && listInterventions.length == 0 && 
+  console.log("current hotel =",currentHotel);
+  const [loading, setloading] = useState(true)
+  currentHotel && listInterventions.length == 0 && loading &&
     Api.get("Interventions/GetInterventions?hotelId=" + currentHotel.ID).then(
       res => {
         dispatch(Selectors.setListeInterventions(res.data));
+        setloading(false)
       }
     );
 
+    useEffect(()=>{
+      if(listInterventions.length > 0) setloading(false)
+    },[listInterventions])
+  
   const onChangeYear = checkedValues => {
     let tmp = listInterventions.filter(item => {
-      return checkedValues.find(e => moment(item.dateTime).year() === e);
+      return checkedValues.find(e => moment(item.StartDateTime).year() === e);
     });
     setinterventions(tmp);
     setcheckedYears(checkedValues);
@@ -90,8 +93,10 @@ function Home() {
   };
 
   const onChangeMonth = checkedValues => {
+    console.log("selected",checkedValues);
     let tmp = listInterventions.filter(item => {
-      return checkedValues.find(e => moment(item.dateTime).month() === e);
+      console.log("cheking month ",moment(item.StartDateTime).month()+1);
+      return checkedValues.find(e => moment(item.StartDateTime).month()+1 === e);
     });
     setinterventions(tmp);
     console.log("tmp = ", tmp);
@@ -102,7 +107,7 @@ function Home() {
     console.log("checkedValues=", checkedValues);
     console.log("listInterventions=", listInterventions);
     let tmp = listInterventions.filter(item => {
-      return checkedValues.find(e => item.status === e);
+      return checkedValues.find(e => item.State === e);
     });
     setinterventions(tmp);
     console.log("tmp = ", tmp);
@@ -111,14 +116,22 @@ function Home() {
 
   //selectionner une intervention
   const selectIntervention = id => {
-    console.log("res= ", selectedInterventions.indexOf(id));
     if (selectedInterventions.indexOf(id) >= 0) {
       let tmp = selectedInterventions.filter(item => item !== id);
       setselectedInterventions(tmp);
     } else {
       setselectedInterventions([...selectedInterventions, id]);
     }
+    
   };
+
+  useEffect(() => {
+    if(selectedInterventions.length==1){
+      let intervention = interventions.filter(item=> item.ID ==selectedInterventions[0])[0]
+      dispatch(Selectors.setCurrentIntervention(`${moment(intervention.StartDateTime).format("dddd DD/MM/YYYY")}`)); //TODO:
+      console.log("current intervention",intervention);
+    }
+ }, [selectedInterventions]);
 
   const selectAllIntervention = () => {
     let Ids = interventions.map(item => item.id);
@@ -131,10 +144,15 @@ function Home() {
   const  updateInterventionState = async  newStatus => {
     if (selectedInterventions.length !== 0) {
       await selectedInterventions.map(item=>{
-        Api.put("Interventions/PutIntervention/"+ item +"?state="+ newStatus)
+        Api.put("Interventions/changeState/"+ item +"?state="+ newStatus)
         .then(res=>{
           console.log("res update =",res)
           if(res.status==204){//update item success
+            Api.get("Interventions/GetInterventions?hotelId=" + currentHotel.ID).then(
+              res => {
+                dispatch(Selectors.setListeInterventions(res.data));
+              }
+            );
           }
         })
       })
@@ -159,22 +177,22 @@ function Home() {
     }
     return (
       <Menu>
-        <Menu.Item onClick={newIntervention}>Nouveau</Menu.Item>
+        <Menu.Item onClick={newIntervention}><Icon type="plus-circle" />  Nouveau</Menu.Item>
 
         {selectedInterventions.length === 1 && (
           <Menu.Item>
-            <Link to={"intervention/" + idIntervention}>Détails</Link>
+            <Link to={"intervention/" + idIntervention}><Icon type="bulb" />  Détails</Link>
           </Menu.Item>
         )}
         {selectedInterventions.length >= 1 && (
-          <Menu.Item onClick={editComment}>Modifier commentaire</Menu.Item>
+          <Menu.Item onClick={editComment}><Icon type="edit" /> Modifier commentaire</Menu.Item>
         )}
-        {selectedInterventions.length === 1 && (
+        {selectedInterventions.length >= 1 && (
           <Menu.Item className="red" onClick={supprimerIntervention}>
-            Supprimer
+            <Icon type="delete" /> Supprimer
           </Menu.Item>
         )}
-        <Menu.Item onClick={selectAllIntervention}>Sélectionner tous</Menu.Item>
+        <Menu.Item onClick={selectAllIntervention}><Icon type="unordered-list" /> Sélectionner tous</Menu.Item>
       </Menu>
     );
   };
@@ -211,7 +229,6 @@ function Home() {
           Api.delete("Interventions/DeleteIntervention/"+ item)
           .then(res=>{
             console.log("res delete =",res)
-            
           })
         })
 
@@ -236,7 +253,15 @@ function Home() {
     setcommentText(Commentaire);
   };
 
-  const saveComment = () => {
+  const saveComment = async () => {
+
+    await selectedInterventions.map(item=>{
+      Api.put("Interventions/EditComment/"+ item +"?comment="+ commentText)
+      .then(res=>{
+        console.log("res update =",res)
+      })
+    })
+
     let tmp = interventions.map(item => {
       if (selectedInterventions.indexOf(item.ID) >= 0)
         return { ...item, Commentaire: commentText };
@@ -258,17 +283,22 @@ function Home() {
   };
 
   const addIntervention = () => {
-    var newID = interventions.length + 2;
+    setloading(true)
     const newIntervention = {...InterventionObject, HotelID: currentHotel.ID }
     Api.post("Interventions/PostIntervention",newIntervention)
     .then(res=>{
       console.log("res add =",res)
+      Api.get("Interventions/GetInterventions?hotelId=" + currentHotel.ID).then(
+        res => {
+          dispatch(Selectors.setListeInterventions(res.data));
+          setinterventions(res.data);
+          setloading(false)
+          message.success("intervention ajoutée avec succès");
+          
+        }
+      );
+      hideModalNew();
     })
-    
-    setinterventions([...interventions, newIntervention]);
-    console.log("to add", { ...InterventionObject, ID: newID });
-    message.success("intervention ajoutée avec succès");
-    hideModalNew();
   };
 
   const hideModalNew = () => {
@@ -294,8 +324,10 @@ function Home() {
     console.log(`selected ${value}`);
     setInterventionObject({ ...InterventionObject, State: value });
   }
+  const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
   return (
+    <Spin indicator={antIcon} spinning={loading}>
     <div>
       <Modal
         title="Modifier le commentaire"
@@ -447,16 +479,17 @@ function Home() {
                 />
               </Panel>
               <Panel
-                header={`${checkedMonth.map(i =>
-                  moment()
-                    .month(i - 1)
-                    .format("MMM")
-                )}`}
+                // header={`${checkedMonth.map(i =>
+                //   moment()
+                //     .month(i - 1)
+                //     .format("MMM")
+                // )}`}
+                header="Mois :"
                 key="2"
               >
                 <Checkbox.Group
                   options={MonthsOptions}
-                  defaultValue={[1]}
+                  defaultValue={[1,2,3,4,5,6,7,8,9,10,11,12]}
                   onChange={onChangeMonth}
                 />
               </Panel>
@@ -479,6 +512,7 @@ function Home() {
         </div>
       </div>
     </div>
+    </Spin>
   );
 }
 

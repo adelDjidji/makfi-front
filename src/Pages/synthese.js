@@ -4,18 +4,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { Breadcrumb, Icon, Collapse, Checkbox, Radio, Row, Col } from "antd";
 import {} from "../Redux/MainReducer";
 import moment from "../moment";
+import {MonthsOptions, YearsOptions} from "../mocks"
 
 const { Panel } = Collapse;
 
-const YearsOptions = [
-  { value: 2020, label: "2020" },
-  { value: 2019, label: "2019" }
-];
 
-const MonthsOptions = [
-  { value: 1, label: "Janvier" },
-  { value: 2, label: "Février" }
-];
 const listeEmployee = [
   {
     id: 1,

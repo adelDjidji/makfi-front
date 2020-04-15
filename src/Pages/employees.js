@@ -18,54 +18,36 @@ import {
   Select
 } from "antd";
 
-import {} from "../Redux/MainReducer";
+import * as Selectors from "../Redux/MainReducer";
+import Api from "../Api/api";
 
 const { Option } = Select;
-const listeEmployee = [
-  {
-    id: 1,
-    username: "Daniel.B",
-    nom: "Daniel",
-    prenom: "Bernard",
-    Etat: "Ok",
-    NumSec: 2341234123,
-    Disponible: false
-  },
-  {
-    id: 2,
-    username: "Angela.B",
-    nom: "Angela",
-    prenom: "Bernard",
-    Etat: "Ok",
-    NumSec: 2300123,
-    Disponible: true
-  },
-  {
-    id: 3,
-    username: "Sofia.D",
-    nom: "Sofia",
-    prenom: "Doulé",
-    Etat: "Ok.",
-    NumSec: 23004123,
-    Disponible: true
-  }
-];
 
 const InitialEmployeeObject = {
-  username: null,
-  nom: null,
-  prenom: null,
-  Etat: null,
-  NumSec: null,
+  FirstName: null,
+  LastName: null,
+  SocialInsurranceNumber: null,
+  State: null,
   Disponible: false
 };
 
 export default () => {
-  const [currentEmployee, setcurrentEmployee] = useState(listeEmployee[0]);
+  const [currentEmployee, setcurrentEmployee] = useState({});
+  const currentuser= useSelector(Selectors.selectCurrentUser)
   const [EmployeeObject, setEmployeeObject] = useState(InitialEmployeeObject);
-  const [Employees, setEmployees] = useState(listeEmployee);
+  const [Employees, setEmployees] = useState([]);
   const [modalNew, setmodalNew] = useState(false);
   const [modalEdit, setmodalEdit] = useState(false);
+
+  const [listeEmployee, setlisteEmployee] = useState([])
+  listeEmployee.length==0 &&
+  Api.get("Employees/GetEmployeesByGroup?employeesGroupID="+ currentuser.EmployeesGroupID)
+  .then(res=>{
+    console.log("res employees ", res.data);
+    setlisteEmployee(res.data)
+    setEmployees(res.data)
+    setcurrentEmployee(res.data[0])
+  });
 
   const supprimerEmployee = () =>
     Modal.confirm({
@@ -74,14 +56,20 @@ export default () => {
       okType: "danger",
       cancelText: "Annuler",
       onOk() {
-        let listnew = listeEmployee.filter(
-          item => currentEmployee.id !== item.id
-        );
-        setEmployees(listnew);
-        listnew.length > 0
-          ? setcurrentEmployee(listnew[0])
-          : setcurrentEmployee(null);
-          message.success("L'employé a été supprimé avec succès")
+        Api.delete("Employees/DeleteEmployee/"+ currentEmployee.ID)
+          .then(res=>{
+            console.log("res delete =",res)
+
+            let listnew = listeEmployee.filter(
+              item => currentEmployee.ID !== item.ID
+            );
+            setEmployees(listnew);
+            listnew.length > 0
+              ? setcurrentEmployee(listnew[0])
+              : setcurrentEmployee(null);
+              message.success("L'employé a été supprimé avec succès")
+
+          })
       },
       onCancel() {
         console.log("Cancel");
@@ -93,18 +81,26 @@ export default () => {
   };
 
   const addEmployee = () => {
-    var newID = listeEmployee.length + 2;
-    setEmployees([
-      ...listeEmployee,
-      {
-        ...EmployeeObject,
-        id: newID,
-        username: EmployeeObject.prenom + "." + EmployeeObject.nom[0]
-      }
-    ]);
-    console.log("to add", { ...EmployeeObject, id: newID });
-    message.success("Employé ajouté avec succès");
-    hideModalNew();
+    Api.post("Employees/PostEmployee",
+    {
+      FirstName: EmployeeObject.FirstName,
+      LastName: EmployeeObject.LastName,
+      SocialInsurranceNumber: EmployeeObject.SocialInsurranceNumber,
+      ProfilePictureUrl: "https://cdn1.vectorstock.com/i/thumb-large/46/55/person-gray-photo-placeholder-woman-vector-22964655.jpg",
+      Username: EmployeeObject.FirstName + EmployeeObject.LastName,
+      Password: "password",
+      EmployeeGroupID: currentuser.EmployeesGroupID
+    })
+    .then(res=>{
+      console.log("res insert", res);
+      Api.get("Employees/GetEmployeesByGroup?employeesGroupID="+ currentuser.EmployeesGroupID)
+      .then(res=>{
+        setEmployees(res.data)
+        message.success("Employé ajouté avec succès");
+      })
+     hideModalNew();      
+    })
+
   };
 
   const hideModalNew = () => {
@@ -115,22 +111,23 @@ export default () => {
   //change numero securite
   const handleChangeNumSec = e => {
     var val = e.target.value;
-    setEmployeeObject({ ...EmployeeObject, NumSec: val });
+    setEmployeeObject({ ...EmployeeObject, SocialInsurranceNumber: val });
   };
   //change nom
   const handleChangeNom = e => {
     console.log("change nom", e.target.value);
     var val = e.target.value;
-    setEmployeeObject({ ...EmployeeObject, nom: val });
+    setEmployeeObject({ ...EmployeeObject, LastName: val });
   };
   //change prenom
   const handleChangePrenom = e => {
     var val = e.target.value;
-    setEmployeeObject({ ...EmployeeObject, prenom: val });
+    console.log("change prenom", e.target.value);
+    setEmployeeObject({ ...EmployeeObject, FirstName: val });
   };
   //change status
   function handleChangeStatus(value) {
-    setEmployeeObject({ ...EmployeeObject, Etat: value });
+    setEmployeeObject({ ...EmployeeObject, State: value });
   }
   //change disponible
   function handleChangeDisponible(value) {
@@ -140,11 +137,11 @@ export default () => {
   const menu = () => {
     return (
       <Menu>
-        <Menu.Item onClick={newEmployeeClick}>Nouveau</Menu.Item>
-        <Menu.Item onClick={editEmployeeClick}>Modifier</Menu.Item>
-        {currentEmployee.id !== null && (
+        <Menu.Item onClick={newEmployeeClick}><Icon type="plus-circle" /> Nouveau</Menu.Item>
+        <Menu.Item onClick={editEmployeeClick}><Icon type="edit" /> Modifier</Menu.Item>
+        {currentEmployee.ID !== null && (
           <Menu.Item className="red" onClick={supprimerEmployee}>
-            Supprimer
+          <Icon type="delete" /> Supprimer
           </Menu.Item>
         )}
       </Menu>
@@ -153,7 +150,7 @@ export default () => {
 
   const DropdownMenu = () => {
     return (
-      <Dropdown key="more" overlay={menu}>
+      <Dropdown key="more" overlay={menu} placement="topLeft">
         <Button
           style={{
             border: "none",
@@ -182,16 +179,21 @@ export default () => {
     setEmployeeObject(currentEmployee);
   };
   const updateEmployee = () => {
+    Api.put("Employees/PutEmployee", { ...EmployeeObject, ID: currentEmployee.ID })
+    .then(res=>{
+      console.log("res update ", res);
+      message.success("les informations de l'employé ont été enregistré avec succès")
+    })
     let tmp = listeEmployee.map(item => {
-      if (item.id == currentEmployee.id)
-        return { ...EmployeeObject, id: currentEmployee.id };
+      if (item.ID == currentEmployee.ID)
+        return { ...EmployeeObject, ID: currentEmployee.ID };
       else return item;
     });
     console.log("tmp after edit =", tmp);
-    setcurrentEmployee({ ...EmployeeObject, id: currentEmployee.id });
+    setcurrentEmployee({ ...EmployeeObject, ID: currentEmployee.id });
     setEmployees(tmp);
     setmodalEdit(false);
-    message.success("les informations de l'employé ont été enregistré avec succès")
+    
   };
   return (
     <div>
@@ -207,7 +209,7 @@ export default () => {
           <Input
             style={{ width: 230 }}
             onChange={handleChangeNom}
-            value={EmployeeObject.nom}
+            value={EmployeeObject.LastName}
           />
         </div>
         <div>
@@ -216,7 +218,7 @@ export default () => {
           <Input
             style={{ width: 230 }}
             onChange={handleChangePrenom}
-            value={EmployeeObject.prenom}
+            value={EmployeeObject.FirstName}
           />
         </div>
         <div>
@@ -226,7 +228,7 @@ export default () => {
             style={{ width: 230 }}
             onChange={handleChangeNumSec}
             type="number"
-            value={EmployeeObject.NumSec}
+            value={EmployeeObject.SocialInsurranceNumber}
           />
         </div>
 
@@ -278,7 +280,7 @@ export default () => {
           <Input
             style={{ width: 230 }}
             onChange={handleChangeNom}
-            value={EmployeeObject.nom}
+            value={EmployeeObject.LastName}
           />
         </div>
         <div>
@@ -287,7 +289,7 @@ export default () => {
           <Input
             style={{ width: 230 }}
             onChange={handleChangePrenom}
-            value={EmployeeObject.prenom}
+            value={EmployeeObject.FirstName}
           />
         </div>
         <div>
@@ -297,7 +299,7 @@ export default () => {
             style={{ width: 230 }}
             onChange={handleChangeNumSec}
             type="number"
-            value={EmployeeObject.NumSec}
+            value={EmployeeObject.SocialInsurranceNumber}
           />
         </div>
 
@@ -307,7 +309,7 @@ export default () => {
           <Select
             placeholder="selectionner un état"
             onChange={handleChangeStatus}
-            defaultValue={EmployeeObject.Etat}
+            defaultValue={EmployeeObject.State}
             style={{ width: 230 }}
           >
             <Option value="Incident">Incident</Option>
@@ -363,17 +365,17 @@ export default () => {
             dataSource={Employees}
             renderItem={item => (
               <List.Item
-                className={`employee-item ${currentEmployee.id == item.id &&
+                className={`employee-item ${currentEmployee.ID == item.ID &&
                   "selected"}`}
                 onClick={() => setcurrentEmployee(item)}
               >
-                {item.username}
+                {item.FirstName} {item.LastName}
               </List.Item>
             )}
           />
         </div>
         <div className="col-9 noPadding">
-          <Row style={{ margin: "0 19px" }}>
+          <Row style={{ margin: "0 58px 0 19px" }}>
             <Col span={24}>
               <PageHeader
                 style={{
@@ -396,7 +398,7 @@ export default () => {
                 </p>
               </Col>
               <Col span={16}>
-                <p>{currentEmployee.nom}</p>
+                <p>{currentEmployee.LastName}</p>
               </Col>
             </div>
             <div className="info-row">
@@ -406,7 +408,7 @@ export default () => {
                 </p>
               </Col>
               <Col span={16}>
-                <p>{currentEmployee.prenom}</p>
+                <p>{currentEmployee.FirstName}</p>
               </Col>
             </div>
             <div className="info-row">
@@ -416,7 +418,7 @@ export default () => {
                 </p>
               </Col>
               <Col span={16}>
-                <p>{currentEmployee.NumSec}</p>
+                <p>{currentEmployee.SocialInsurranceNumber}</p>
               </Col>
             </div>
 
@@ -427,7 +429,7 @@ export default () => {
                 </p>
               </Col>
               <Col span={16}>
-                <p>{currentEmployee.Etat}</p>
+                <p>{currentEmployee.State}</p>
               </Col>
             </div>
             <div className="info-row">

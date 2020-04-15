@@ -28,13 +28,13 @@ export default ({ intervention, onClick, selected = false }) => {
       className={`intervention-item container ${selected && "selected"}`}
       onClick={onClick}
     >
-      <span className="col-3 noPadding">
+      <span className="col-4 noPadding">
         <Tooltip
           title={moment(intervention.StartDateTime).format("DD/MM/YYYY HH:mm")}
         >
           <b>{`${moment(intervention.StartDateTime).format("dddd")} ${moment(
             intervention.StartDateTime
-          ).format("DD")}`}</b>
+          ).format("DD MMM")}`}</b>
         </Tooltip>
       </span>
       <span className="col-3 noPadding">
@@ -46,7 +46,7 @@ export default ({ intervention, onClick, selected = false }) => {
           {intervention.State == "NonFait" && <Badge status="default" />}
         </Tooltip>
       </span>
-      <span className="col-5 noPadding text">{intervention.Commentaire}</span>
+      <span className="col-4 noPadding text">{intervention.Commentaire}</span>
       <span className="col-1 noPadding">
         {
           //intervention.active && <span className="active"></span>

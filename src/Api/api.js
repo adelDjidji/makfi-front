@@ -19,8 +19,11 @@ const Api= axios.create({
         common: options
       }
   });
-  
-export const get = (url, calback)=>{
-    axios.get()
-}
+export const Api2 = axios.create({
+    baseURL: 'https://makfi.azurewebsites.net/',
+    headers: {
+        common: options
+      }
+  });
+
 export default Api;

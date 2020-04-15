@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
-import { selectEntretiens, setCurrentIntervention } from "../Redux/MainReducer";
+import * as Selectors  from "../Redux/MainReducer";
 
 import EntretienItem from "../Components/EntretienItem";
 import {
@@ -19,135 +19,38 @@ import {
   Checkbox,
   Input,
   message,
-  Select
+  Select,
+  Spin
 } from "antd";
 
 import moment from "../moment";
+import Api from "../Api/api";
 
 const { Panel } = Collapse;
 const { Option } = Select;
 
-const YearsOptions = [
-  { value: 2020, label: "2020" },
-  { value: 2019, label: "2019" }
-];
-
-const MonthsOptions = [
-  { value: 1, label: "Janvier" },
-  { value: 2, label: "Février" }
-];
 const InitialEntetienObject = {
-  RoomGroup: null,
+  RoomGroupID: null,
   Comment: null,
   InterventionID: null,
-  Employee: null,
+  EmployeeID: null,
   State: false
 };
-
-const listEtages = [
-  {
-    ID: 1,
-    title: "Reception"
-  },
-  {
-    ID: 2,
-    title: "Etage A1"
-  },
-  {
-    ID: 3,
-    title: "Etage A2"
-  },
-  {
-    ID: 4,
-    title: "Etage B1"
-  },
-  {
-    ID: 5,
-    title: "Etage B2"
-  },
-  {
-    ID: 6,
-    title: "Etage C"
-  }
-];
-
-const listeEmployee = [
-  {
-    id: 1,
-    username: "Daniel.B",
-    nom: "Daniel",
-    prenom: "Bernard"
-  },
-  {
-    id: 2,
-    username: "Angela.B",
-    nom: "Angela",
-    prenom: "Bernard"
-  },
-  {
-    id: 3,
-    username: "Sofia.D",
-    nom: "Sofia",
-    prenom: "Doulé"
-  }
-];
-
-const listEntretiens = [
-  {
-    ID: 1,
-    RoomGroup: "Etage A1",
-    Comment: "commentaire 1",
-    InterventionID: 23,
-    Employee: "Sofia.D",
-    State: false
-  },
-  {
-    ID: 2,
-    RoomGroup: "Etage A2",
-    Comment: "commentaire",
-    InterventionID: 23,
-    Employee: "Daniel.B",
-    State: true
-  },
-  {
-    ID: 3,
-    RoomGroup: "Etage C",
-    Comment: "",
-    InterventionID: 23,
-    Employee: "",
-    State: true
-  }
-];
-
-const listeEtagesOptions = listEtages.map(i => {
-  return { label: i.title, value: i.title };
-});
 
 const listeEtatsOptions = [
   { label: "valide", value: true },
   { label: "non-valide", value: false }
 ];
 
-const listeEmployeeOptions = listeEmployee.map(i => {
-  if (i.username !== "")
-    return {
-      label: i.username,
-      value: i.username
-    };
-  else
-    return {
-      label: "NUL",
-      value: ""
-    };
-});
+
 
 export default ({ match }) => {
   const dispatch = useDispatch();
-
-  const [checkedEtages, setcheckedEtages] = useState(listeEtagesOptions);
+  const currentuser= useSelector(Selectors.selectCurrentUser)
+  const [checkedEtages, setcheckedEtages] = useState([]);
   const [checkedEtats, setcheckedEtats] = useState(listeEtatsOptions);
   const [checkedEtatsString, setcheckedEtatsString] = useState("");
-  const [checkedEmployee, setcheckedEmployee] = useState(listeEmployeeOptions);
+  const [checkedEmployee, setcheckedEmployee] = useState([]);
   
   const [selectedEntretiens, setselectedEntretiens] = useState([]);
   const [modalEdit, setmodalEdit] = useState(false);
@@ -155,9 +58,7 @@ export default ({ match }) => {
   const [commentText, setcommentText] = useState("");
   const [EntretienObject, setEntretienObject] = useState(InitialEntetienObject);
   
-  console.log("id = ", match.params.id);
-
-  dispatch(setCurrentIntervention(`of ID ${match.params.id}`));
+  
 
   //selectionner une intervention
   const selectEntretien = id => {
@@ -175,7 +76,56 @@ export default ({ match }) => {
     else setselectedEntretiens(Ids);
   };
 
-  const [Entretiens, setEntretiens] = useState(listEntretiens);
+  console.log("id = ", match.params.id);
+
+
+
+  const [Entretiens, setEntretiens] = useState([]);
+  const [listEntretiens, setlistEntretiens] = useState([]);
+  const [loading, setloading] = useState(true)
+  listEntretiens.length==0 && loading &&
+  Api.get("Entretiens/GetEntretiens?InterventionID="+ match.params.id)
+  .then(res=>{
+    console.log("res entretiens ", res.data);
+    setlistEntretiens(res.data)
+    setEntretiens(res.data)
+    setloading(false)
+    
+  })
+
+  const [listeEmployee, setlisteEmployee] = useState([])
+  const  [listeEmployeeOptions, setlisteEmployeeOptions] = useState([])
+  listeEmployee.length==0 && 
+  Api.get("Employees/GetEmployeesByGroup?employeesGroupID="+ currentuser.EmployeesGroupID)
+  .then(res=>{
+    console.log("res employees ", res.data);
+    setlisteEmployee(res.data)
+    let tmp = res.data.map(i => {
+        return {
+          label: `${i.FirstName} ${i.LastName}`,
+          value: i.ID
+        };
+    });
+    setlisteEmployeeOptions(tmp)
+    setcheckedEmployee(tmp)
+  })
+
+  const [listEtages, setlistEtages] = useState([])
+  const [listeEtagesOptions, setlisteEtagesOptions] = useState([])
+  const currentHotel = useSelector(Selectors.selectCurrentHotel)
+  listEtages.length==0 && 
+  Api.get("RoomGroups/GetRoomGroups?HotelID="+ currentHotel.ID)
+  .then(res=>{
+    console.log("res rooms groups ", res.data);
+    setlistEtages(res.data)
+    let tmp = res.data.map(i => {
+      return { label: i.Name, value: i.ID };
+    });
+    setlisteEtagesOptions(tmp)
+    console.log("rooms groups options",tmp);
+    setcheckedEtages(tmp)
+  })
+
 
   /**
    * filtre entretiens by Etage
@@ -184,7 +134,7 @@ export default ({ match }) => {
   const onChangeEtageFilter = checkedValues => {
     console.log("checkedValues",checkedValues)
     let tmp = listEntretiens.filter(item => {
-      return checkedValues.indexOf(item.RoomGroup)>=0
+      return checkedValues.indexOf(item.RoomGroup.ID)>=0
     });
     setEntretiens(tmp);
     console.log("tmp = ", tmp);
@@ -196,10 +146,10 @@ export default ({ match }) => {
    * @param {liste of checked etages} checkedValues
    */
   const onChangeEtatFilter = checkedValues => {
+    console.log("checked", checkedValues);
     let tmp= listEntretiens.filter(item=>{
       return checkedValues.indexOf(item.State)>=0
     })
-
     setEntretiens(tmp);
     console.log("tmp = ", tmp);
     setcheckedEtats(checkedValues);
@@ -228,7 +178,7 @@ export default ({ match }) => {
     console.log("checkedValues", checkedValues);
     let tmp = listEntretiens.filter(item => {
       return checkedValues.find(
-        e => item.Employee === e || item.Employee === ""
+        e => item.Employee.ID === e 
       );
     });
     setEntretiens(tmp);
@@ -242,14 +192,24 @@ export default ({ match }) => {
    */
   const updateEntretienEmployee = employee => {
     if (selectedEntretiens.length > 0) {
-      let tmp = Entretiens.map(item => {
-        if (selectedEntretiens.indexOf(item.ID) >= 0)
-          return { ...item, Employee: employee.username };
-        else return item;
+      setloading(true)
+      selectedEntretiens.map(item => { 
+        Api.put("Entretiens/AffectToEmployee/"+ item +"?employeeId="+ employee.ID)
+        .then(res=>{
+          console.log("res update employee =",res)
+          Api.get("Entretiens/GetEntretiens?InterventionID="+ match.params.id)
+          .then(res=>{
+            setlistEntretiens(res.data) 
+            setEntretiens(res.data)
+            message.success("employé affecté avec succès");
+            setselectedEntretiens([]);
+            setloading(false)
+          })
+        })
+        
       });
-      setEntretiens(tmp);
-      message.success("employé affecté avec succès");
-      setselectedEntretiens([]);
+      
+      
     } else {
       message.warning(`Veuillez selectionner un entretien d'abord.`);
     }
@@ -264,27 +224,29 @@ export default ({ match }) => {
   };
 
   const menu = () => {
-    var entretienID;
+    var entretienID
+    var current
     if (selectedEntretiens.length >= 1) {
       entretienID = selectedEntretiens[0];
+      current= Entretiens.filter(item=>item.ID==entretienID)[0]
     }
     return (
       <Menu>
-        <Menu.Item onClick={newEntretien}>Nouveau</Menu.Item>
+        <Menu.Item onClick={newEntretien}><Icon type="plus-circle" /> Nouveau</Menu.Item>
         {selectedEntretiens.length === 1 && (
           <Menu.Item>
-            <Link to={"/roomGroup/" + entretienID}>Détails</Link>
+            <Link to={"/roomGroup/" + entretienID}><Icon type="bulb" /> Détails</Link>
           </Menu.Item>
         )}
         {selectedEntretiens.length >= 1 && (
-          <Menu.Item onClick={editComment}>Modifier commentaire</Menu.Item>
+          <Menu.Item onClick={editComment}><Icon type="edit" /> Modifier commentaire</Menu.Item>
         )}
-        {selectedEntretiens.length === 1 && (
+        {selectedEntretiens.length >= 1 && (
           <Menu.Item className="red" onClick={supprimerEntretien}>
-            Supprimer
+          <Icon type="delete" /> Supprimer
           </Menu.Item>
         )}
-        <Menu.Item onClick={selectAllEntretien}>Sélectionner tous</Menu.Item>
+        <Menu.Item onClick={selectAllEntretien}><Icon type="unordered-list" /> Sélectionner tous</Menu.Item>
       </Menu>
     );
   };
@@ -317,6 +279,13 @@ export default ({ match }) => {
       okType: "danger",
       cancelText: "Annuler",
       onOk() {
+        selectedEntretiens.map(item=>{
+          Api.delete("Entretiens/DeleteEntretien/"+ item)
+          .then(res=>{
+            console.log("res delete =",res)
+            
+          })
+        })
         let listnew = Entretiens.filter(
           item => selectedEntretiens.indexOf(item.ID) < 0
         );
@@ -331,6 +300,10 @@ export default ({ match }) => {
   const changeENtretienState = e => {
     var newState = e.target.checked;
     var id = e.target.value;
+    Api.put("Entretiens/ChangeState/"+ id +"?state="+ newState)
+      .then(res=>{
+        console.log("res update state =",res)
+      })
     let tmp = Entretiens.map(item => {
       if (item.ID == id) return { ...item, State: newState };
       else return item;
@@ -339,7 +312,14 @@ export default ({ match }) => {
     message.success("Etat d'entretien changé avec succès");
   };
 
-  const saveComment = () => {
+  const saveComment = async () => {
+    await selectedEntretiens.map(item=>{
+      Api.put("Entretiens/EditComment/"+ item +"?comment="+ commentText)
+      .then(res=>{
+        console.log("res update =",res)
+      })
+    })
+
     let tmp = Entretiens.map(item => {
       if (selectedEntretiens.indexOf(item.ID) >= 0)
         return { ...item, Comment: commentText };
@@ -361,11 +341,22 @@ export default ({ match }) => {
   };
 
   const addEntretien = () => {
-    var newID = Entretiens.length + 2;
-    setEntretiens([...Entretiens, { ...EntretienObject, ID: newID }]);
-    console.log("to add", { ...EntretienObject, ID: newID });
-    message.success("intervention ajoutée avec succès");
-    hideModalNew();
+    setloading(true)
+    Api.post("Entretiens/PostEntretien",{...EntretienObject, InterventionID:match.params.id})
+    .then(res=>{
+      console.log("res ajout entretien", res);
+      Api.get("Entretiens/GetEntretiens?InterventionID="+ match.params.id)
+      .then(res=>{
+        console.log("res entretiens ", res.data);
+        setlistEntretiens(res.data) 
+        setEntretiens(res.data)
+        setloading(false)
+        message.success("intervention ajoutée avec succès");
+
+      })
+      hideModalNew();
+    })
+    
   };
 
   const hideModalNew = () => {
@@ -382,13 +373,16 @@ export default ({ match }) => {
   };
 
   const handleChangeEmp = val => {
-    setEntretienObject({ ...EntretienObject, Employee: val });
+    setEntretienObject({ ...EntretienObject, EmployeeID: val });
   };
   const handleChangeEtage = val => {
-    setEntretienObject({ ...EntretienObject, RoomGroup: val });
+    setEntretienObject({ ...EntretienObject, RoomGroupID: val });
   };
 
-  return (
+  const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+
+return (
+  <Spin indicator={antIcon} spinning={loading}>
     <div>
       <Modal
         title="Modifier le commentaire"
@@ -415,7 +409,7 @@ export default ({ match }) => {
           <br />
           <Select onChange={handleChangeEmp} style={{ width: 230 }}>
             {listeEmployee.map(emp => (
-              <Option value={emp.username}>{emp.username}</Option>
+              <Option value={emp.ID}>{emp.FirstName} {emp.LastName}</Option>
             ))}
           </Select>
         </div>
@@ -424,7 +418,7 @@ export default ({ match }) => {
           <br />
           <Select onChange={handleChangeEtage} style={{ width: 230 }}>
             {listEtages.map(etage => (
-              <Option value={etage.title}>{etage.title}</Option>
+              <Option value={etage.ID}>{etage.Name}</Option>
             ))}
           </Select>
         </div>
@@ -477,7 +471,7 @@ export default ({ match }) => {
                 className="state-item"
                 onClick={updateEntretienEmployee.bind(this, item)}
               >
-                {item.username}
+                {item.FirstName} {item.LastName}
               </List.Item>
             )}
           />
@@ -531,7 +525,7 @@ export default ({ match }) => {
                 header={
                   checkedEmployee.length == listeEmployee.length
                     ? "Tous les employés"
-                    : `${checkedEmployee}`
+                    : `Employé :`
                 }
                 key="1"
               >
@@ -545,7 +539,7 @@ export default ({ match }) => {
                 header={
                   checkedEtages.length == listEtages.length
                     ? "Tous les étages"
-                    : `${checkedEtages}`
+                    : `Étage :`
                 }
                 key="2"
               >
@@ -559,7 +553,7 @@ export default ({ match }) => {
                 header={
                   checkedEtats.length == 2
                     ? "Tous les états"
-                    : `${checkedEtatsString}`
+                    : `États :`
                 }
                 key="3"
               >
@@ -574,5 +568,6 @@ export default ({ match }) => {
         </div>
       </div>
     </div>
+    </Spin>
   );
 };

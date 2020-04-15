@@ -19,10 +19,10 @@ export default ({ entretien, onClick, selected = false, onchangeState }) => {
       onClick={onClick}
     >
       <span className="col-3 noPadding">
-        <b>{entretien.RoomGroup}</b>
+        <b>{entretien.RoomGroup.Name}</b>
       </span>
       <span className="col-3 noPadding">
-        <b>{entretien.Employee}</b>
+        {entretien.Employee!=null && <b>{entretien.Employee.FirstName} {entretien.Employee.LastName}</b>}
       </span>
       <span className="col-3 noPadding">
         <Checkbox value={entretien.ID} checked={entretien.State} onChange={onchangeState} />

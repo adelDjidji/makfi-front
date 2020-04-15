@@ -51,13 +51,13 @@ function Login() {
     e.preventDefault();
     setpending(true)
     Api.post("Users/Login", {
-      UserName: "daniellopeze",//"admin",
+      UserName: "daniellopezem",//"admin",
       Password: "password", //"3V#YMuJ$=m?yGN4V"
     })
       .then(function(response) {
         window.localStorage.setItem("at", response.data.token);
         console.log("reponse", response);
-        setpending(false)
+        
         dispatch(setCurrentUser(response.data.employee))
         dispatch(setAuthenticated());
       })
@@ -65,7 +65,7 @@ function Login() {
         message.error(error.message)
         console.log("err=", error.message);
       });
-
+      setpending(false)
     console.log("Success submit");
   };
 
@@ -76,7 +76,8 @@ function Login() {
         style={{ padding: "28pt", textAlign: "center" }}
         name="basic"
         initialValues={{
-          remember: true
+          remember: true,
+          username:"daniellopezem"
         }}
         onSubmit={onSubmit}
       >
@@ -90,12 +91,13 @@ function Login() {
             }
           ]}
         >
-          <Input />
+          <Input placeholder="daniellopezem" />
         </Form.Item>
 
         <Form.Item
           label="Password"
           name="password"
+          defaultValue="password"
           rules={[
             {
               required: true,
@@ -103,7 +105,7 @@ function Login() {
             }
           ]}
         >
-          <Input.Password />
+          <Input.Password placeholder="password" />
         </Form.Item>
 
         <Form.Item {...tailLayout} name="remember" valuePropName="checked">

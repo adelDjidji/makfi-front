@@ -2,11 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
-import {
-  selectChambreInterventions,
-  setListeInterventions
-} from "../Redux/MainReducer";
-
+import * as Selectors from "../Redux/MainReducer";
+import Api from "../Api/api"
 import InterventionRoomItem from "../Components/InterventionRoomItem";
 import {
   Breadcrumb,
@@ -24,7 +21,8 @@ import {
   Modal,
   Input,
   DatePicker,
-  Select
+  Select, 
+  Spin
 } from "antd";
 
 import { listeEtat } from "../mocks";
@@ -32,95 +30,39 @@ import { listeEtat } from "../mocks";
 const { Option } = Select;
 
 const { Panel } = Collapse;
+const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 const InitialEntetienObject = {
-  NumeroChambre: null,
+  Name: null,
   RoomGroup: null,
+  RoomGroupID: null,
   Comment: null,
   Status: null,
-  Employee: null
+  Employee: null,
+  EmployeeID:null
 };
 
-const listEtages = [
-  {
-    ID: 1,
-    title: "Reception"
-  },
-  {
-    ID: 2,
-    title: "Etage A1"
-  },
-  {
-    ID: 3,
-    title: "Etage A2"
-  },
-  {
-    ID: 4,
-    title: "Etage B1"
-  },
-  {
-    ID: 5,
-    title: "Etage B2"
-  },
-  {
-    ID: 6,
-    title: "Etage C"
-  }
-];
 
-const listeEmployee = [
-  {
-    id: 1,
-    username: "Daniel.B",
-    nom: "Daniel",
-    prenom: "Bernard"
-  },
-  {
-    id: 2,
-    username: "Angela.B",
-    nom: "Angela",
-    prenom: "Bernard"
-  },
-  {
-    id: 3,
-    username: "Sofia.D",
-    nom: "Sofia",
-    prenom: "Doulé"
-  }
-];
 
-const listeEtagesOptions = listEtages.map(i => {
-  return { label: i.title, value: i.title };
+
+const listeEtatsOptions = listeEtat.map(i => {
+  return { label: i.text, value: i.state };
 });
 
-const listeEtatsOptions = [
-  { label: "Ok", value: "success" },
-  { label: "Incident", value: "error" },
-  { label: "Non-fait", value: "default" }
-];
 
-const listeEmployeeOptions = listeEmployee.map(i => {
-  if (i.username !== "")
-    return {
-      label: i.username,
-      value: i.username
-    };
-  else
-    return {
-      label: "NUL",
-      value: ""
-    };
-});
 
 export default () => {
   const dispatch = useDispatch();
 
-  const listInterventions = useSelector(selectChambreInterventions);
-  const [interventions, setinterventions] = useState(listInterventions);
-  const [checkedEtages, setcheckedEtages] = useState(listeEtagesOptions);
+  const currentuser= useSelector(Selectors.selectCurrentUser)
+
+
+  // const listInterventions = useSelector(Selectors.selectChambreInterventions);
+  const [interventions, setinterventions] = useState([]);
   const [checkedEtats, setcheckedEtats] = useState(listeEtatsOptions);
   const [checkedEtatsString, setcheckedEtatsString] = useState("");
-  const [checkedEmployee, setcheckedEmployee] = useState(listeEmployeeOptions);
+  const [checkedEtages, setcheckedEtages] = useState([]);
+  const [checkedEmployee, setcheckedEmployee] = useState([]);
   const [selectedInterventions, setselectedInterventions] = useState([]);
   const [modalEdit, setmodalEdit] = useState(false);
   const [modalNew, setmodalNew] = useState(false);
@@ -129,13 +71,69 @@ export default () => {
     InitialEntetienObject
   );
 
+  const  [loading, setloading] = useState(true)
+  const  [stop, setstop] = useState(false)
+  const currentHotel = useSelector(Selectors.selectCurrentHotel);
+
+  const [listInterventions, setlistInterventions] = useState([])
+  useEffect(()=>{
+    // listInterventions.length === 0 && !stop &&
+    Api.get("Rooms/GetRooms?HotelID="+ currentHotel.ID)
+    .then(res=>{
+      console.log("res chmbres=", res.data);
+      if(res.data.length==0) setstop(true)
+      setlistInterventions(res.data)
+      setinterventions(res.data)
+    })
+  },[currentHotel.ID])
+  
+
+  const [listEtages, setlistEtages] = useState([])
+  const [listeEtagesOptions, setlisteEtagesOptions] = useState([])
+  // var listeEtagesOptions = []
+  listEtages.length==0 && 
+  Api.get("RoomGroups/GetRoomGroups?HotelID="+ currentHotel.ID)
+  .then(res=>{
+    console.log("res rooms groups ", res.data);
+    setlistEtages(res.data)
+    let tmp  = res.data.map(i => {
+      return { label: i.Name, value: i.ID };
+    });
+    setlisteEtagesOptions(tmp)
+    console.log("rooms groups options",tmp);
+    setcheckedEtages(tmp)
+    setloading(false)
+  })
+  
+
+
+  const [listeEmployee, setlisteEmployee] = useState([])
+  var listeEmployeeOptions = []
+  listeEmployee.length==0 && 
+  Api.get("Employees/GetEmployeesByGroup?employeesGroupID="+ currentuser.EmployeesGroupID)
+  .then(res=>{
+    console.log("res employees ", res.data);
+    setlisteEmployee(res.data)
+    listeEmployeeOptions = res.data.map(i => {
+        return {
+          label: `${i.FirstName} ${i.LastName}`,
+          value: i.ID
+        };
+    });
+    console.log("listeEmployeeOptions",listeEmployeeOptions);
+    setcheckedEmployee(listeEmployeeOptions)
+  })
+
+
+
   /**
    * filtre entretiens by Etage
    * @param {liste of checked etages} checkedValues
    */
   const onChangeEtageFilter = checkedValues => {
+    console.log("checked values =", checkedValues);
     let tmp = listInterventions.filter(item => {
-      return checkedValues.indexOf(item.RoomGroup) >= 0;
+      return checkedValues.indexOf(item.RoomGroup.ID) >= 0;
     });
     setinterventions(tmp);
     console.log("tmp = ", tmp);
@@ -211,18 +209,37 @@ export default () => {
     else setselectedInterventions(Ids);
   };
 
-  const updateInterventionState = newStatus => {
+  const updateInterventionState = async newStatus => {
     console.log('selectedInterventions', selectedInterventions)
-    if (selectedInterventions.length !== 0) {
-      let tmp = listInterventions.map(item => {
-        if (selectedInterventions.indexOf(item.id) >= 0)
-          return { ...item, Status: newStatus };
-        else return item;
-      });
-      console.log("tmp", tmp);
-      setinterventions(tmp);
-      message.success("Etat modifié avec succès");
-      setselectedInterventions([]);
+    if (selectedInterventions.length > 0) {
+      setloading(true)
+      await selectedInterventions.map(item=>{
+        Api.put("Rooms/ChangeStatus/"+ item +"?status="+ newStatus)
+        .then(res=>{
+          console.log("res update =",res)
+          if(res.status==204){//update item success
+            Api.get("Rooms/GetRooms?HotelID=" + currentHotel.ID).then(
+              res => {
+                setinterventions(res.data);
+                setlistInterventions(res.data)
+                message.success("Etat modifié avec succès");
+                setselectedInterventions([]);
+                setloading(false)
+              }
+            );
+          }
+        })
+      })
+
+      // let tmp = listInterventions.map(item => {
+      //   if (selectedInterventions.indexOf(item.id) >= 0)
+      //     return { ...item, Status: newStatus };
+      //   else return item;
+      // });
+      // console.log("tmp", tmp);
+      // setinterventions(tmp);
+      
+      
     } else {
       message.warning(`Veuillez selectionner une intervention d'abord.`);
     }
@@ -235,22 +252,22 @@ export default () => {
     }
     return (
       <Menu>
-        <Menu.Item onClick={newIntervention}>Nouveau</Menu.Item>
+        <Menu.Item onClick={newIntervention}><Icon type="plus-circle" />  Nouveau</Menu.Item>
 
         {selectedInterventions.length === 1 && (
           <Menu.Item>
-            <Link to={"/room/" + idIntervention}>Détails</Link>
+            <Link to={"/room/" + idIntervention}><Icon type="bulb" />  Détails</Link>
           </Menu.Item>
         )}
         {selectedInterventions.length >= 1 && (
-          <Menu.Item onClick={editComment}>Modifier commentaire</Menu.Item>
+          <Menu.Item onClick={editComment}><Icon type="edit" /> Modifier commentaire</Menu.Item>
         )}
-        {selectedInterventions.length === 1 && (
+        {selectedInterventions.length >= 1 && (
           <Menu.Item className="red" onClick={supprimerIntervention}>
-            Supprimer
+            <Icon type="delete" /> Supprimer
           </Menu.Item>
         )}
-        <Menu.Item onClick={selectAllIntervention}>Sélectionner tous</Menu.Item>
+        <Menu.Item onClick={selectAllIntervention}><Icon type="unordered-list" /> Sélectionner tous</Menu.Item>
       </Menu>
     );
   };
@@ -283,11 +300,21 @@ export default () => {
       okType: "danger",
       cancelText: "Annuler",
       onOk() {
-        let listnew = listInterventions.filter(
-          item => selectedInterventions.indexOf(item.id) < 0
-        );
-        setinterventions(listnew);
-        setselectedInterventions([]);
+        setloading(true)
+        selectedInterventions.map(item=>{
+          Api.delete("Rooms/DeleteRoom/"+ item)
+          .then(res=>{
+            console.log("res delete =",res)
+            Api.get("Rooms/GetRooms?HotelID="+ currentHotel.ID)
+            .then(res=>{
+              setinterventions(res.data);
+              setlistInterventions(res.data);
+              setselectedInterventions([]);
+              setloading(false)
+            })
+          })
+        })
+        
       },
       onCancel() {
         console.log("Cancel");
@@ -297,7 +324,7 @@ export default () => {
   const editComment = () => {
     setmodalEdit(!modalEdit);
     let { Comment } = listInterventions.filter(
-      e => e.id == selectedInterventions[0]
+      e => e.ID == selectedInterventions[0]
     )[0];
     console.log("id=", selectedInterventions[0]);
     console.log("comment=", Comment);
@@ -307,17 +334,28 @@ export default () => {
   /**
    * update comment of selected interventions
    */
-  const saveComment = () => {
-    let tmp = listInterventions.map(item => {
-      if (selectedInterventions.indexOf(item.id) >= 0)
-        return { ...item, Comment: commentText };
-      else return item;
-    });
-    setinterventions(tmp);
-    message.success("commentaire modifié avec succès");
-    setselectedInterventions([]);
-    hideModal();
-    setcommentText("");
+  const saveComment = async () => {
+
+    await selectedInterventions.map(item=>{
+      Api.put("Rooms/ChangeComment/"+ item +"?comment="+ commentText)
+      .then(res=>{
+        console.log("res update =",res)
+
+        let tmp = listInterventions.map(item => {
+          if (selectedInterventions.indexOf(item.ID) >= 0)
+            return { ...item, Comment: commentText };
+          else return item;
+        });
+        setinterventions(tmp);
+        setlistInterventions(tmp);
+        message.success("commentaire modifié avec succès");
+        setselectedInterventions([]);
+        hideModal();
+        setcommentText("");
+
+      })
+    })
+
   };
 
   const hideModal = () => {
@@ -328,15 +366,29 @@ export default () => {
     setmodalNew(true);
   };
 
-  const addIntervention = () => {
+  const addIntervention = () => { 
     var newID = listInterventions.length + 2;
-    setinterventions([
-      ...listInterventions,
-      { ...InterventionObject, id: newID }
-    ]);
-    console.log("to add", { ...InterventionObject, id: newID });
-    message.success("intervention ajoutée avec succès");
-    hideModalNew();
+    setloading(true)
+    Api.post("Rooms/PostRoom",
+      {
+        RoomGroupID:InterventionObject.RoomGroupID,
+        Name:InterventionObject.Name,
+        Status: InterventionObject.Status,
+        Comment: InterventionObject.Comment,
+        EmployeeID: InterventionObject.EmployeeID
+      })
+    .then(res=>{
+      console.log("res ajout room", res);
+      hideModalNew();
+      Api.get("Rooms/GetRooms?HotelID="+ currentHotel.ID)
+      .then(res=>{
+        setinterventions(res.data)
+        setlistInterventions(res.data)
+        message.success("intervention ajoutée avec succès");
+        setloading(false)
+      })
+      
+    })
   };
 
   const hideModalNew = () => {
@@ -354,16 +406,19 @@ export default () => {
   //change numero chambre
   const handleChangeNumero = e => {
     var val = e.target.value;
-    setInterventionObject({ ...InterventionObject, NumeroChambre: val });
+    setInterventionObject({ ...InterventionObject, Name: val });
   };
+
   //change Room group
   const handleChangeRoomGroup = val => {
-    setInterventionObject({ ...InterventionObject, RoomGroup: val });
+    setInterventionObject({ ...InterventionObject, RoomGroupID: val });
   };
+
   //change Employee
   const handleChangeEmployee = val => {
-    setInterventionObject({ ...InterventionObject, Employee: val });
+    setInterventionObject({ ...InterventionObject, EmployeeID: val });
   };
+  
   //change status
   function handleChangeStatus(value) {
     setInterventionObject({ ...InterventionObject, Status: value });
@@ -392,13 +447,12 @@ export default () => {
         footer={[]}
       >
         <div>
-          <small>Numero de la chambre</small>
-          <br />
+          <small>Libélé de chambre</small>
+          <br/>
           <Input
-          style={{ width: 230 }}
+            style={{ width: 230 }}
             onChange={handleChangeNumero}
-            type="number"
-            value={InterventionObject.NumeroChambre}
+            value={InterventionObject.Name}
           />
         </div>
 
@@ -407,7 +461,7 @@ export default () => {
           <br />
           <Select placeholder="selectionner un étage" onChange={handleChangeRoomGroup} style={{ width: 230 }}>
             {listEtages.map(item => (
-              <Option value={item.title}>{item.title}</Option>
+              <Option value={item.ID}>{item.Name}</Option>
             ))}
           </Select>
         </div>
@@ -416,7 +470,7 @@ export default () => {
           <br />
           <Select placeholder="selectionner l'employé" onChange={handleChangeEmployee} style={{ width: 230 }}>
             {listeEmployee.map(item => (
-              <Option value={item.username}>{item.username}</Option>
+              <Option value={item.ID}>{item.FirstName} {item.LastName}</Option>
             ))}
           </Select>
         </div>
@@ -424,9 +478,9 @@ export default () => {
           <small>Etat</small>
           <br />
           <Select placeholder="selectionner un état" onChange={handleChangeStatus} style={{ width: 230 }}>
-            <Option value="error">Incident</Option>
-            <Option value="success">Ok</Option>
-            <Option value="default">Non fait</Option>
+            <Option value="Incident">Incident</Option>
+            <Option value="OK">Ok</Option>
+            <Option value="NonFait">Non fait</Option>
           </Select>
         </div>
 
@@ -476,7 +530,7 @@ export default () => {
             renderItem={item => (
               <List.Item
                 className="state-item"
-                onClick={updateInterventionState.bind(this, item.status)}
+                onClick={updateInterventionState.bind(this, item.state)}
               >
                 <Badge status={item.status} />
                 {item.text}
@@ -498,18 +552,20 @@ export default () => {
               }
               extra={[<DropdownMenu key="more" />]}
             />
+            <Spin indicator={antIcon} spinning={loading}>
             <div className="table-body">
               {interventions.map(item => (
                 <InterventionRoomItem
                   intervention={item}
-                  selected={selectedInterventions.indexOf(item.id) >= 0}
-                  onClick={selectIntervention.bind(this, item.id)}
+                  selected={selectedInterventions.indexOf(item.ID) >= 0}
+                  onClick={selectIntervention.bind(this, item.ID)}
                 />
               ))}
               {interventions.length == 0 && (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
               )}
             </div>
+            </Spin>
           </div>
         </div>
         <div className="col-2 noPadding filtre-zone">
@@ -520,25 +576,27 @@ export default () => {
               <span className="filtre-title">
                 <Icon type="funnel-plot" /> Filtres
               </span>
-              <Panel
-                header={
-                  checkedEmployee.length == listeEmployee.length
-                    ? "Tous les employés"
-                    : `${checkedEmployee}`
-                }
-                key="1"
-              >
-                <Checkbox.Group
-                  options={listeEmployeeOptions}
-                  defaultValue={listeEmployeeOptions.map(i => i.value)}
-                  onChange={onChangeEmployeeFilter}
-                />
-              </Panel>
+              {
+              //   <Panel
+              //   header={
+              //     checkedEmployee.length == listeEmployee.length
+              //       ? "Tous les employés"
+              //       : `${checkedEmployee}`
+              //   }
+              //   key="1"
+              // >
+              //   <Checkbox.Group
+              //     options={listeEmployeeOptions}
+              //     defaultValue={listeEmployeeOptions.map(i => i.value)}
+              //     onChange={onChangeEmployeeFilter}
+              //   />
+              // </Panel>
+            }
               <Panel
                 header={
                   checkedEtages.length == listEtages.length
                     ? "Tous les étages"
-                    : `${checkedEtages}`
+                    : `Étages :`
                 }
                 key="2"
               >
@@ -554,7 +612,7 @@ export default () => {
                     ? "Tous les états"
                     : checkedEtats.length == 0
                     ? "Aucun état"
-                    : `${checkedEtatsString}`
+                    : `${checkedEtats}`
                 }
                 key="3"
               >

@@ -77,7 +77,7 @@ export default props => {
   const currentHotel = useSelector(Selectors.selectCurrentHotel);
 
   const isAuth = useSelector(Selectors.getIsAuth);
-  hotels.length==0 && 
+  hotels.length==0 && currentuser !=null &&
   Api.get("Hotels/GetHotels?employeesGroupID="+currentuser.EmployeesGroupID)
   .then(res=>{
     console.log("hotells=",res.data);
@@ -148,7 +148,7 @@ export default props => {
                   Accueil
                 </Route>
                 <Route exact path="/intervention/:id">
-                  Intervention du {currentIntervention}
+                  Intervention du {currentIntervention||" jour"}
                 </Route>
                 <Route exact path="/roomGroup/:id">
                   Group de chambres - Détail
