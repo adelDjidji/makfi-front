@@ -1,17 +1,6 @@
 import React from "react";
 import { Checkbox } from "antd";
-import moment from "moment";
 
-const getStatusText = statusCode => {
-  switch (statusCode) {
-    case "error":
-      return "Incident";
-    case "success":
-      return "Ok";
-    case "default":
-      return "Non fait";
-  }
-};
 export default ({ entretien, onClick, selected = false, onchangeState }) => {
   return (
     <div

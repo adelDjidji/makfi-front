@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { BrowserRouter as Router, useHistory } from "react-router-dom";
 import {
   Form,
   Input,
@@ -113,7 +112,10 @@ function Login() {
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button type="primary" htmlType="submit">
-            Se connecter <Icon type="login" />
+          {pending?
+            <Spin indicator={antIcon}></Spin>:
+           <span>Se connecter <Icon type="login" /></span> }
+            
           </Button>
         </Form.Item>
       </Form>

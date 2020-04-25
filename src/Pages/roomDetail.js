@@ -1,19 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 
-import {
-  selectInterventions,
-  setCurrentIntervention
-} from "../Redux/MainReducer";
-
-import EntretienItem from "../Components/EntretienItem";
 import { Breadcrumb, Icon, Row, Col } from "antd";
 
-import "../styles/App.css";
 
 export default ({ match }) => {
-  const dispatch = useDispatch();
 
   const data = {
       id: 3,

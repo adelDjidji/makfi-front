@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Breadcrumb, Icon, Collapse, Checkbox, Radio, Row, Col } from "antd";
 import {} from "../Redux/MainReducer";
 import moment from "../moment";
@@ -269,7 +268,7 @@ export default () => {
             </span>
             <Panel
               header={
-                checkedEmployee.length == listeEmployee.length
+                checkedEmployee.length === listeEmployee.length
                   ? "Tous les employés"
                   : `${checkedEmployee}`
               }

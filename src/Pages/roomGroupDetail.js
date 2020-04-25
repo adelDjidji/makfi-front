@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-import EntretienItem from "../Components/EntretienItem";
 import { Breadcrumb, Icon, Row, Col, Spin } from "antd";
 
 import "../styles/App.css";
@@ -12,14 +10,9 @@ const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 
 export default ({ match }) => {
-  const dispatch = useDispatch();
   const [data, setdata] = useState(null);
   const [loading, setloading] = useState(true);
-  // const data = {
-  //   nom: "Etage A2",
-  //   comment: "k",
-  //   employee: ["Angel.B", "Daniel.P"]
-  // };
+
   console.log("id = ", match.params.id);
   loading &&
   Api.get("Entretiens/GetEntretien/" + match.params.id)

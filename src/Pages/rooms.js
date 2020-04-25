@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Link} from "react-router-dom";
 
 import * as Selectors from "../Redux/MainReducer";
 import Api from "../Api/api"
@@ -20,7 +20,6 @@ import {
   message,
   Modal,
   Input,
-  DatePicker,
   Select, 
   Spin
 } from "antd";
@@ -52,7 +51,6 @@ const listeEtatsOptions = listeEtat.map(i => {
 
 
 export default () => {
-  const dispatch = useDispatch();
 
   const currentuser= useSelector(Selectors.selectCurrentUser)
 
@@ -72,7 +70,7 @@ export default () => {
   );
 
   const  [loading, setloading] = useState(true)
-  const  [stop, setstop] = useState(false)
+  // const  [stop, setstop] = useState(false)
   const currentHotel = useSelector(Selectors.selectCurrentHotel);
 
   const [listInterventions, setlistInterventions] = useState([])
@@ -81,7 +79,7 @@ export default () => {
     Api.get("Rooms/GetRooms?HotelID="+ currentHotel.ID)
     .then(res=>{
       console.log("res chmbres=", res.data);
-      if(res.data.length==0) setstop(true)
+      // if(res.data.length==0) setstop(true)
       setlistInterventions(res.data)
       setinterventions(res.data)
     })
@@ -90,7 +88,6 @@ export default () => {
 
   const [listEtages, setlistEtages] = useState([])
   const [listeEtagesOptions, setlisteEtagesOptions] = useState([])
-  // var listeEtagesOptions = []
   listEtages.length==0 && 
   Api.get("RoomGroups/GetRoomGroups?HotelID="+ currentHotel.ID)
   .then(res=>{
@@ -109,7 +106,7 @@ export default () => {
 
   const [listeEmployee, setlisteEmployee] = useState([])
   var listeEmployeeOptions = []
-  listeEmployee.length==0 && 
+  listeEmployee.length===0 && 
   Api.get("Employees/GetEmployeesByGroup?employeesGroupID="+ currentuser.EmployeesGroupID)
   .then(res=>{
     console.log("res employees ", res.data);
@@ -202,9 +199,9 @@ export default () => {
   };
 
   const selectAllIntervention = () => {
-    let Ids = listInterventions.map(item => item.id);
+    let Ids = listInterventions.map(item => item.ID);
     console.log("IDS=", Ids);
-    if (Ids.length == selectedInterventions.length)
+    if (Ids.length === selectedInterventions.length)
       setselectedInterventions([]);
     else setselectedInterventions(Ids);
   };
@@ -324,7 +321,7 @@ export default () => {
   const editComment = () => {
     setmodalEdit(!modalEdit);
     let { Comment } = listInterventions.filter(
-      e => e.ID == selectedInterventions[0]
+      e => e.ID === selectedInterventions[0]
     )[0];
     console.log("id=", selectedInterventions[0]);
     console.log("comment=", Comment);
@@ -561,7 +558,7 @@ export default () => {
                   onClick={selectIntervention.bind(this, item.ID)}
                 />
               ))}
-              {interventions.length == 0 && (
+              {interventions.length === 0 && (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
               )}
             </div>
@@ -579,7 +576,7 @@ export default () => {
               {
               //   <Panel
               //   header={
-              //     checkedEmployee.length == listeEmployee.length
+              //     checkedEmployee.length === listeEmployee.length
               //       ? "Tous les employés"
               //       : `${checkedEmployee}`
               //   }
@@ -594,7 +591,7 @@ export default () => {
             }
               <Panel
                 header={
-                  checkedEtages.length == listEtages.length
+                  checkedEtages.length === listEtages.length
                     ? "Tous les étages"
                     : `Étages :`
                 }
@@ -608,9 +605,9 @@ export default () => {
               </Panel>
               <Panel
                 header={
-                  checkedEtats.length == 3
+                  checkedEtats.length === 3
                     ? "Tous les états"
-                    : checkedEtats.length == 0
+                    : checkedEtats.length === 0
                     ? "Aucun état"
                     : `${checkedEtats}`
                 }

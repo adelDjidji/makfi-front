@@ -103,7 +103,7 @@ body{
 cursor: pointer;
 background: aliceblue;
 }
-.intervention-item.selected, .employee-item.selected{
+.intervention-item.selected, .employee-item.selected,.message-item.selected{
   background: #0986c1;
   color: white;
 }

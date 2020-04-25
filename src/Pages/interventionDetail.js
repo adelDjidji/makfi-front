@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 import * as Selectors  from "../Redux/MainReducer";
 
@@ -13,7 +13,6 @@ import {
   Dropdown,
   Button,
   Collapse,
-  DatePicker,
   List,
   Modal,
   Checkbox,
@@ -23,7 +22,6 @@ import {
   Spin
 } from "antd";
 
-import moment from "../moment";
 import Api from "../Api/api";
 
 const { Panel } = Collapse;
@@ -45,7 +43,6 @@ const listeEtatsOptions = [
 
 
 export default ({ match }) => {
-  const dispatch = useDispatch();
   const currentuser= useSelector(Selectors.selectCurrentUser)
   const [checkedEtages, setcheckedEtages] = useState([]);
   const [checkedEtats, setcheckedEtats] = useState(listeEtatsOptions);
@@ -72,7 +69,7 @@ export default ({ match }) => {
 
   const selectAllEntretien = () => {
     let Ids = Entretiens.map(item => item.ID);
-    if (Ids.length == selectedEntretiens.length) setselectedEntretiens([]);
+    if (Ids.length === selectedEntretiens.length) setselectedEntretiens([]);
     else setselectedEntretiens(Ids);
   };
 
@@ -217,7 +214,7 @@ export default ({ match }) => {
 
   const editComment = () => {
     setmodalEdit(!modalEdit);
-    let { Comment } = Entretiens.filter(e => e.ID == selectedEntretiens[0])[0];
+    let { Comment } = Entretiens.filter(e => e.ID === selectedEntretiens[0])[0];
     console.log("id=", selectedEntretiens[0]);
     console.log("comment=", Comment);
     setcommentText(Comment);
@@ -305,7 +302,7 @@ export default ({ match }) => {
         console.log("res update state =",res)
       })
     let tmp = Entretiens.map(item => {
-      if (item.ID == id) return { ...item, State: newState };
+      if (item.ID === id) return { ...item, State: newState };
       else return item;
     });
     setEntretiens(tmp);
@@ -500,7 +497,7 @@ return (
                 />
               ))}
               {
-                //   Entretiens.length == 0 && (
+                //   Entretiens.length === 0 && (
                 //   <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 // )
               }
@@ -523,7 +520,7 @@ return (
 
               <Panel
                 header={
-                  checkedEmployee.length == listeEmployee.length
+                  checkedEmployee.length === listeEmployee.length
                     ? "Tous les employés"
                     : `Employé :`
                 }
@@ -537,7 +534,7 @@ return (
               </Panel>
               <Panel
                 header={
-                  checkedEtages.length == listEtages.length
+                  checkedEtages.length === listEtages.length
                     ? "Tous les étages"
                     : `Étage :`
                 }
@@ -551,7 +548,7 @@ return (
               </Panel>
               <Panel
                 header={
-                  checkedEtats.length == 2
+                  checkedEtats.length === 2
                     ? "Tous les états"
                     : `États :`
                 }

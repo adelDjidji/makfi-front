@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { Link} from "react-router-dom";
 
 import {
   Breadcrumb,
@@ -185,12 +185,12 @@ export default () => {
       message.success("les informations de l'employé ont été enregistré avec succès")
     })
     let tmp = listeEmployee.map(item => {
-      if (item.ID == currentEmployee.ID)
+      if (item.ID === currentEmployee.ID)
         return { ...EmployeeObject, ID: currentEmployee.ID };
       else return item;
     });
     console.log("tmp after edit =", tmp);
-    setcurrentEmployee({ ...EmployeeObject, ID: currentEmployee.id });
+    setcurrentEmployee({ ...EmployeeObject, ID: currentEmployee.ID });
     setEmployees(tmp);
     setmodalEdit(false);
     
@@ -365,7 +365,7 @@ export default () => {
             dataSource={Employees}
             renderItem={item => (
               <List.Item
-                className={`employee-item ${currentEmployee.ID == item.ID &&
+                className={`employee-item ${currentEmployee.ID === item.ID &&
                   "selected"}`}
                 onClick={() => setcurrentEmployee(item)}
               >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackspace } from '@fortawesome/free-solid-svg-icons'
 import {message} from "antd";
@@ -17,6 +17,7 @@ export default ({onSuccess, key="0000"}) => {
             var currentCode=""
             currentCodeArray.map(item=>{
                 currentCode+=item
+                return item
             })
             currentCode+=value
             console.log("currentCode= ",currentCode)
@@ -34,7 +35,7 @@ export default ({onSuccess, key="0000"}) => {
     }
     const clearValue =()=>{
         var length = currentCodeArray.length
-        if(length==0) return;
+        if(length===0) return;
         let tmp = currentCodeArray
         tmp.pop()
         setcurrentCodeArray([...tmp])

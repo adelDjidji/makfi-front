@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React from "react";
 import { Breadcrumb, Icon } from "antd";
 
 import {} from "../Redux/MainReducer";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default () => {
   return (

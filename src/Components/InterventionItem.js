@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge, Icon, Tooltip, Typography } from "antd";
+import { Badge, Icon, Tooltip } from "antd";
 import moment from "moment";
 
 const getStatusText = state => {
@@ -41,9 +41,9 @@ export default ({ intervention, onClick, selected = false }) => {
         <Icon className="small-icon" type="clock-circle" />
         <b>{moment(intervention.StartDateTime).format("HH:mm")}</b>
         <Tooltip title={intervention.State}>
-          {intervention.State == "Incident" && <Badge status="error" />}
-          {intervention.State == "OK" && <Badge status="success" />}
-          {intervention.State == "NonFait" && <Badge status="default" />}
+          {intervention.State === "Incident" && <Badge status="error" />}
+          {intervention.State === "OK" && <Badge status="success" />}
+          {intervention.State === "NonFait" && <Badge status="default" />}
         </Tooltip>
       </span>
       <span className="col-4 noPadding text">{intervention.Commentaire}</span>

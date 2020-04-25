@@ -1,6 +1,6 @@
 import React from "react";
-import { Badge, Icon, Tooltip, Typography } from "antd";
-import moment from "moment";
+import { Badge, Tooltip } from "antd";
+
 
 const getStatusText =(statusCode)=>{
   switch(statusCode){
@@ -23,9 +23,9 @@ export default ({ intervention, onClick, selected= false }) => {
       <span className="col-4 noPadding">
         {intervention.Employee && <b>{intervention.Employee.FirstName} {intervention.Employee.LastName}</b>}
         <Tooltip title={intervention.Status}>
-        {intervention.Status == "Incident" && <Badge status="error" />}
-        {intervention.Status == "OK" && <Badge status="success" />}
-        {intervention.Status == "NonFait" && <Badge status="default" />}
+        {intervention.Status === "Incident" && <Badge status="error" />}
+        {intervention.Status === "OK" && <Badge status="success" />}
+        {intervention.Status === "NonFait" && <Badge status="default" />}
         </Tooltip>
       </span>
       <span className="col-5 noPadding text">{intervention.Comment}</span>
