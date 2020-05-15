@@ -24,7 +24,8 @@ import {
   Menu,
   Empty,
   Spin,
-  Modal
+  Modal,
+  Result
 } from "antd";
 
 import "antd/dist/antd.css";
@@ -167,7 +168,34 @@ export default (props) => {
     </Menu>
   );
 
-  if (!isAuth) return <Login />;
+  if (!isAuth) {
+    console.log(window.location.pathname);
+    let path = window.location.pathname
+    let param = path.substr(1)
+    console.log("param = ",param);
+    console.log("param  search= ",param.search("room"));
+    if(param==="") return <Result
+    status="404"
+    title="Identifiant manquant"
+    subTitle="Veuillez SVP verifier votre identifiant dans l'url."
+    // extra={<Button type="primary">Obtenir votre lien d'authentification.</Button>}
+  />
+    if(
+      param.search("room")===-1 &&
+      param.search("intervention") ===-1 &&
+      param.search("synthese") ===-1 &&
+      param.search("employes") ===-1 &&
+      param.search("message") ===-1
+      ){
+        return <Login id={param} />
+      }
+    return <Result
+  status="403"
+  title="403"
+  subTitle="Desolé, Vous devez etre authentifié pour acceder à cette page."
+  extra={<Button type="primary">Obtenir votre lien d'authentification.</Button>}
+/>;
+}
   return (
     <div>
       <Router>
@@ -301,7 +329,8 @@ export default (props) => {
         </div>
         <hr className="transparent" />
         <Switch>
-          <Route exact path="/" component={Dashbord} />
+          
+          
           <Route exact path="/interventions" component={Interventions} />
           <Route
             exact
@@ -319,7 +348,7 @@ export default (props) => {
           <Route exact path="/rooms" component={Rooms} />
           <Route exact path="/employess" component={Employees} />
           <Route exact path="/messages" component={Messages} />
-          <Route exact path="/login" component={Login} />
+          <Route path="/" component={Dashbord} />
         </Switch>
       </Router>
     </div>

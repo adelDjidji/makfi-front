@@ -25,7 +25,6 @@ import Api from "../Api/api";
 const { Title } = Typography;
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
-const { TabPane } = Tabs;
 const layout = {
   labelCol: {
     span: 6
@@ -41,17 +40,20 @@ const tailLayout = {
   // }
 };
 
-function Login() {
+
+export default ({match, id})=>{
   // const history = useHistory();
   const dispatch = useDispatch();
   const [pending, setpending] = useState(false);
 
+  // console.log("id ===",match.params.id);
+  console.log("id ===",id);
   const onSubmit = e => {
     e.preventDefault();
     setpending(true)
     Api.post("Users/Login", {
-      UserName: "daniellopezem",//"admin",
-      Password: "password", //"3V#YMuJ$=m?yGN4V"
+      UserName: id,//"admin",
+      Password: "9999", //"3V#YMuJ$=m?yGN4V"
     })
       .then(function(response) {
         window.localStorage.setItem("at", response.data.token);
@@ -128,6 +130,28 @@ function Login() {
     }, 500);
     // history.push("/");
   };
+  const onPINChange = (pin) => {
+    console.log("PIN is ", pin);
+    setpending(true)
+    Api.post("Users/Login", {
+      UserName: id,
+      Password: pin, 
+    })
+      .then(function(response) {
+        window.localStorage.setItem("at", response.data.token);
+        console.log("reponse", response);
+        dispatch(setCurrentUser(response.data.employee))
+        dispatch(setAuthenticated());
+      })
+      .catch(function(error) {
+        // message.error(error.message)
+        message.error("code incorrect")
+        console.log("err=", error.message);
+      }).finally(function(){
+        setpending(false)
+      })
+      
+  }
   return (
     <div style={{ padding: "0 9pt", height: "100%" }}>
       <Title className="head-title center" level={2}>
@@ -145,18 +169,10 @@ function Login() {
 
       <Spin indicator={antIcon} spinning={pending}>
         <div>
-          <Tabs tabPosition="bottom">
-            <TabPane tab="Mot de passe" key="1">
-              <FormLoginPassword />
-            </TabPane>
-            <TabPane tab="Code PIN" key="2">
-              <CodePINForm onSuccess={onPinSuccess} />
-            </TabPane>
-          </Tabs>
+              <CodePINForm onChange={onPINChange} onSuccess={onPinSuccess} />
         </div>
       </Spin>
     </div>
   );
 }
 
-export default Login;

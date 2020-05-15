@@ -1,17 +1,19 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBackspace } from '@fortawesome/free-solid-svg-icons'
-import {message} from "antd";
+import { faBackspace } from '@fortawesome/free-solid-svg-icons';
 
 import "../styles/login.min.css"
 
-export default ({onSuccess, key="0000"}) => {
+export default function PINForm ({onSuccess, key="0000", onChange, error}){
 
     const [currentCodeArray, setcurrentCodeArray] = useState([])
 
     const pushValue= (value)=>{
         console.log("length=",currentCodeArray.length)
-        if(currentCodeArray.length>=4) return;
+        if(currentCodeArray.length===4) {
+            setcurrentCodeArray([value]);
+            return;
+        }
         setcurrentCodeArray([...currentCodeArray, value])
         if(currentCodeArray.length===3) {
             var currentCode=""
@@ -21,14 +23,15 @@ export default ({onSuccess, key="0000"}) => {
             })
             currentCode+=value
             console.log("currentCode= ",currentCode)
-            if(currentCode===key){
-                message.success("Correct !") 
-                onSuccess && onSuccess()
-            } 
-            else message.error("Code incorrect !") &&
-            setTimeout(() => {
-                setcurrentCodeArray([])
-              }, 500);
+            onChange(currentCode)
+            // if(currentCode===key){
+            //     message.success("Correct !") 
+            //     onchange && onChange(currentCode)
+            // } 
+            // else message.error("Code incorrect !") &&
+            // setTimeout(() => {
+            //     setcurrentCodeArray([])
+            //   }, 500);
             
         }
         
@@ -67,4 +70,3 @@ export default ({onSuccess, key="0000"}) => {
         
       );
 }
-
