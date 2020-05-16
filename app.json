@@ -1,0 +1,8 @@
+{
+    "name": "makfi",
+    "description": "gestion des femme de menages",
+    "repository": "https://github.com/adelDjidji/makfi-front.git",
+    "logo": "https://cdn.rawgit.com/heroku/node-js-getting-started/master/public/node.svg",
+    "keywords": ["makfi"]
+  }
+  

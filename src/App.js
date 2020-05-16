@@ -162,7 +162,11 @@ export default (props) => {
   );
   const menuUser = (
     <Menu>
-      <Menu.Item onClick={() => dispatch(Selectors.setLoggedOut())}>
+      <Menu.Item onClick={() => {
+        dispatch(Selectors.setLoggedOut())
+        window.location.href="/"+window.localStorage.getItem("code");
+      }
+    }>
         <span>deconnexion</span>
       </Menu.Item>
     </Menu>

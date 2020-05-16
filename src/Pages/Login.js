@@ -139,6 +139,7 @@ export default ({match, id})=>{
     })
       .then(function(response) {
         window.localStorage.setItem("at", response.data.token);
+        window.localStorage.setItem("code",id);
         console.log("reponse", response);
         dispatch(setCurrentUser(response.data.employee))
         dispatch(setAuthenticated());
